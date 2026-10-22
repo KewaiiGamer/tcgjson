@@ -45,11 +45,12 @@ def test_default_enabled_product_lines_include_popular_and_manual() -> None:
     ids = default_enabled_product_line_ids(FakeGamesClient())
     names = default_enabled_product_line_names(FakeGamesClient())
 
-    assert ids == [1, 2, 3, 63, 68, 71, 79, 89, 81]
+    assert ids == [1, 2, 3, 85, 63, 68, 71, 79, 89, 81]
     assert names == [
         "Popular Game",
         "YuGiOh",
         "Pokemon",
+        "Pokemon Japan",
         "Digimon Card Game",
         "One Piece Card Game",
         "Disney Lorcana",
