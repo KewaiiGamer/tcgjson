@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'KewaiiGamer/tcgjson'
     runs-on: ubuntu-latest
     timeout-minutes: 340
     steps:
