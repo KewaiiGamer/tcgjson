@@ -53,7 +53,7 @@ jobs:
           python -m tcgjson.jp_native
           --catalog release/pokemon-japan.json.gz
           --ptcg-root ptcg-database
-          --report "$RUNNER_TEMP/jp-native-report.json"
+          --report release/jp-native-report.json
           --min-share 0.6
       - name: Publish release (Japan)
         id: japan
@@ -63,7 +63,7 @@ jobs:
           set -euo pipefail
           notes="Pokemon Japan (TCGplayer product line 85), built by tcgjson. Other languages converted from PTCG-database (https://github.com/type-null/PTCG-database, MIT License, Copyright (c) 2025 Weihang Ren) at commit $(sed -n 's/^commit=//p' ptcg-database.lock). Simplified Chinese converted from PTCG-CHS-Datasets (https://github.com/KewaiiGamer/PTCG-CHS-Datasets) at commit $(sed -n 's/^commit=//p' chs-dataset.lock)."
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Extra catalogs $TAG" --notes "$notes"
-          gh release upload "$TAG" release/pokemon-japan.json.gz --clobber
+          gh release upload "$TAG" release/pokemon-japan.json.gz release/jp-native-report.json --clobber
       - name: Download the previous release's language files (gates and name pins)
         id: previous
         env:

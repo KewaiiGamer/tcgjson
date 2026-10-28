@@ -10,17 +10,28 @@ TCGplayer rows carry no HP or Pokedex number, so trust compares the PTCG card's
 Pokedex number, turned into an English species word with ``data_en``, against the
 TCGplayer English name:
 
-* A set is trusted when at least 5 of its rows sit on a PTCG Pokemon card with a
-  known Pokedex number and at least 95% of those rows contain that species word.
-* Set code candidates, in order: the TCGplayer abbreviation (exact, then ignoring
-  case), the set-name prefix before ``:`` (exact, then ignoring case). The first
-  trusted candidate wins. Failing that, every PTCG code is tried and the set links
-  only if exactly one code is trusted.
-* Inside a trusted set a row is still refused when the PTCG card is a Pokemon whose
-  species word is not in the row name, when it is not a Pokemon but the row name ends
-  in a species name, or when PTCG has two different names at that number.
+* A row's *words* are its name without the " - 001/073" tail and without anything in
+  parentheses, split on spaces and folded to ASCII ("Pikachu (Master Ball Pattern)"
+  -> ["pikachu"]). A row agrees with a Pokemon card when one word is the species word,
+  or the species word plus a card suffix ("pikachugx") or a Nidoran gender letter.
+* Rows whose collector number names another set ("028/DPt-P" when the code is not
+  DPt-P) are ignored.
+* A set is trusted against a PTCG code when at least 5 distinct collector numbers sit
+  on a PTCG Pokemon card with a known Pokedex number, and at least 95% of those numbers
+  have every row printed there agreeing.
+* Every PTCG code is scored. The named candidates are the TCGplayer abbreviation
+  (exact, then ignoring case) and the set-name prefix before ``:`` (same). A trusted
+  named candidate with the highest agreeing count wins. Otherwise the single best
+  trusted code wins only if it has at least twice the agreeing numbers of the next
+  trusted code ("content" route); anything else links nothing ("ambiguous").
+* Inside a trusted set a row is still refused when PTCG has two different names at
+  that number, when the card is a Pokemon the row does not agree with, when the card
+  is not a Pokemon but the row's last word is a species word, when the card is an
+  Energy but the row has no word "energy", or when the row's last word is "energy"
+  but the card is not an Energy.
 
-Rows that are not linked keep no ``nameNative``; nothing else in the file changes.
+Rows that are not linked get no ``nameNative`` (a blank one in the input is dropped);
+nothing else in the file changes.
 """
 from __future__ import annotations
 
@@ -40,26 +51,42 @@ from .atomic import atomic_write_json, atomic_write_json_gzip
 
 MIN_COMPARED = 5
 MIN_AGREEMENT = 0.95
+# A content-route winner needs this many times the agreeing numbers of the runner-up.
+MIN_MARGIN = 2
 # A word shared by the names of more than this many species is not a species word
 # ("Galarian", "Team", "Rocket's").
 MAX_SPECIES_PER_WORD = 2
-# Card-name suffixes dropped before looking at the last word of a row name.
+# Card-name suffixes; dropped before looking at a row's last word.
 NAME_SUFFIXES = {"ex", "v", "vmax", "vstar", "gx", "break", "lvx", "prime", "legend", "star"}
+# What may follow a species word inside one folded word: "pikachugx", "nidoranf".
+_WORD_TAILS = {"", "f", "m"} | NAME_SUFFIXES
 
 _NUMBER = re.compile(r"0*(\d+)")
 _NAME_TAIL = re.compile(r"\s+-\s+\S*\d\S*.*$")  # " - 001/073", " - 132/SV-P (Holo)"
 _PARENS = re.compile(r"\([^)]*\)")
+_ENERGY_JA = "エネルギー"  # エネルギー
 
 
 @dataclass(frozen=True)
 class JpCard:
     name: str
-    is_pokemon: bool
+    kind: str  # "pokemon", "energy" or "trainer"
     dex: int | None
+
+    @property
+    def is_pokemon(self) -> bool:
+        return self.kind == "pokemon"
 
 
 # code -> collector number key -> cards printed there
 CardIndex = dict[str, dict[str, tuple[JpCard, ...]]]
+
+
+@dataclass(frozen=True)
+class Row:
+    key: str  # collector number key ("1" for "001/073")
+    suffix: str | None  # folded part after "/" when it has letters ("svp" for "132/SV-P")
+    words: tuple[str, ...]
 
 
 @dataclass
@@ -127,8 +154,11 @@ def clean_name(name: Any) -> str | None:
     return name or None
 
 
-def is_pokemon(record: dict[str, Any]) -> bool:
-    return unicodedata.normalize("NFC", str(record.get("card_type") or "")) == "Pokémon"
+def card_kind(record: dict[str, Any]) -> str:
+    card_type = unicodedata.normalize("NFC", str(record.get("card_type") or ""))
+    if card_type == "Pokémon":
+        return "pokemon"
+    return "energy" if _ENERGY_JA in card_type else "trainer"
 
 
 def _dex(value: Any) -> int | None:
@@ -139,17 +169,20 @@ def _dex(value: Any) -> int | None:
     return dex if dex > 0 else None
 
 
-def load_ptcg_folder(folder: Path) -> list[dict[str, Any]]:
-    """Every card object under ``folder`` (one JSON file per card); unreadable files are skipped."""
-    records = []
+def load_ptcg_folder(folder: Path) -> tuple[list[dict[str, Any]], int]:
+    """(card objects under ``folder``, number of JSON files skipped as unreadable)."""
+    records, skipped = [], 0
     for path in sorted(Path(folder).rglob("*.json")):
         try:
             record = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
+            skipped += 1
             continue
         if isinstance(record, dict):
             records.append(record)
-    return records
+        else:
+            skipped += 1
+    return records, skipped
 
 
 def build_species_tokens(en_records: Iterable[dict[str, Any]]) -> dict[int, str]:
@@ -163,7 +196,7 @@ def build_species_tokens(en_records: Iterable[dict[str, Any]]) -> dict[int, str]
     for record in en_records:
         name = clean_name(record.get("name"))
         dex = _dex(str(record.get("card_key") or "").split("|")[0])
-        if name and dex and is_pokemon(record):
+        if name and dex and card_kind(record) == "pokemon":
             names[dex][name] += 1
     spread: dict[str, set[int]] = defaultdict(set)
     for dex, counter in names.items():
@@ -194,7 +227,7 @@ def build_card_index(jp_records: Iterable[dict[str, Any]]) -> CardIndex:
         name = clean_name(record.get("name"))
         if not isinstance(code, str) or not code.strip() or number is None or name is None:
             continue
-        card = JpCard(name=name, is_pokemon=is_pokemon(record), dex=_dex(record.get("pokedex_number")))
+        card = JpCard(name=name, kind=card_kind(record), dex=_dex(record.get("pokedex_number")))
         index[code.strip()][number].append(card)
     return {code: {n: tuple(cards) for n, cards in by_number.items()} for code, by_number in index.items()}
 
@@ -206,52 +239,67 @@ def _slot_card(cards: tuple[JpCard, ...] | None) -> JpCard | None:
     return cards[0]
 
 
-def _base_words(row_name: str) -> list[str]:
+def row_words(row_name: str) -> tuple[str, ...]:
+    """Folded words of a row name without its number tail and parentheses."""
     name = _PARENS.sub(" ", _NAME_TAIL.sub("", row_name))
-    words = [fold(w) for w in name.split()]
-    words = [w for w in words if w]
-    while words and words[-1] in NAME_SUFFIXES:
-        words.pop()
-    return words
+    return tuple(w for w in (fold(word) for word in name.split()) if w)
 
 
-def _species_agrees(card: JpCard, row_name: str, tokens: dict[int, str]) -> bool | None:
+def _row(product: dict[str, Any]) -> Row | None:
+    number = product.get("collectorNumber")
+    key = number_key(number)
+    if key is None:
+        return None
+    text = str(number)
+    tail = text.split("/", 1)[1].strip() if "/" in text else ""
+    suffix = fold(tail) if re.search(r"[A-Za-z]", tail) else None
+    return Row(key=key, suffix=suffix, words=row_words(str(product.get("name") or "")))
+
+
+def _row_in_code(row: Row, code: str) -> bool:
+    return row.suffix is None or row.suffix == fold(code)
+
+
+def _species_agrees(card: JpCard, words: tuple[str, ...], tokens: dict[int, str]) -> bool | None:
     """True/False for a Pokemon card with a known species word, None when not comparable."""
     if not card.is_pokemon or card.dex not in tokens:
         return None
-    return tokens[card.dex] in fold(row_name)
+    token = tokens[card.dex]
+    return any(w.startswith(token) and w[len(token):] in _WORD_TAILS for w in words)
 
 
-def _row_accepts(card: JpCard, row_name: str, tokens: dict[int, str], species_words: set[str]) -> bool:
-    agrees = _species_agrees(card, row_name, tokens)
+def _row_accepts(card: JpCard, words: tuple[str, ...], tokens: dict[int, str],
+                 species_words: set[str]) -> bool:
+    if card.kind == "energy":
+        return "energy" in words
+    if words and words[-1] == "energy":
+        return False
+    agrees = _species_agrees(card, words, tokens)
     if agrees is not None:
         return agrees
     if card.is_pokemon:
         return True  # a Pokemon without a usable Pokedex number inherits the set's trust
-    words = _base_words(row_name)
-    return not (words and words[-1] in species_words)
+    trimmed = list(words)
+    while trimmed and trimmed[-1] in NAME_SUFFIXES:
+        trimmed.pop()
+    return not (trimmed and trimmed[-1] in species_words)
 
 
-def _keyed(products: list[dict[str, Any]]) -> list[tuple[str, str]]:
-    """(number key, folded name) of each row with a numeric collector number."""
-    out = []
-    for product in products:
-        key = number_key(product.get("collectorNumber"))
-        if key is not None:
-            out.append((key, fold(str(product.get("name") or ""))))
-    return out
-
-
-def _trust(rows: list[tuple[str, str]], cards: dict[str, tuple[JpCard, ...]],
+def _trust(rows: list[Row], code: str, cards: dict[str, tuple[JpCard, ...]],
            tokens: dict[int, str]) -> tuple[int, int]:
-    """(rows compared, rows agreeing) for one PTCG code: Pokemon slots with a species word."""
-    compared = agreed = 0
-    for key, folded_name in rows:
-        card = _slot_card(cards.get(key))
-        if card is not None and card.is_pokemon and card.dex in tokens:
-            compared += 1
-            agreed += tokens[card.dex] in folded_name
-    return compared, agreed
+    """(numbers compared, numbers agreeing) for one PTCG code, over Pokemon slots with a
+    species word; a number agrees when every row printed at it agrees."""
+    verdicts: dict[str, bool] = {}
+    for row in rows:
+        if not _row_in_code(row, code):
+            continue
+        card = _slot_card(cards.get(row.key))
+        if card is None:
+            continue
+        agrees = _species_agrees(card, row.words, tokens)
+        if agrees is not None:
+            verdicts[row.key] = verdicts.get(row.key, True) and agrees
+    return len(verdicts), sum(verdicts.values())
 
 
 def _is_trusted(compared: int, agreed: int) -> bool:
@@ -282,18 +330,13 @@ def _candidates(set_row: dict[str, Any], codes: Iterable[str]) -> list[tuple[str
 
 def resolve_set(set_row: dict[str, Any], products: list[dict[str, Any]], index: CardIndex,
                 tokens: dict[int, str]) -> SetLink:
-    """Pick the PTCG set code for one TCGplayer set, or none.
-
-    Every PTCG code is scored; among the trusted ones the code with the most agreeing
-    rows wins. On a tie the named candidate (abbreviation or name prefix) wins; a tie
-    between codes that are not named candidates links nothing ("ambiguous").
-    """
+    """Pick the PTCG set code for one TCGplayer set, or none (see the module docstring)."""
     link = SetLink(set_id=set_row.get("setId"), set_name=str(set_row.get("name") or ""),
                    abbreviation=str(set_row.get("abbreviation") or ""), code=None, route="none",
                    rows=len(products))
-    rows = _keyed(products)
+    rows = [r for r in (_row(p) for p in products) if r is not None]
     named = _candidates(set_row, index)
-    scores = {code: _trust(rows, index[code], tokens) for code in index}
+    scores = {code: _trust(rows, code, index[code], tokens) for code in index}
     trusted = {code: score for code, score in scores.items() if _is_trusted(*score)}
     if not trusted:
         if named:  # report the first named candidate's numbers
@@ -301,13 +344,13 @@ def resolve_set(set_row: dict[str, Any], products: list[dict[str, Any]], index: 
             link.route = "untrusted:" + code
             link.compared, link.agreed = scores[code]
         return link
-    best = max(agreed for _compared, agreed in trusted.values())
-    top = [code for code, (_c, agreed) in trusted.items() if agreed == best]
-    named_top = [(code, route) for code, route in named if code in top]
-    if named_top:
-        code, route = named_top[0]
-    elif len(top) == 1:
-        code, route = top[0], "content"
+    ranked = sorted(trusted, key=lambda c: (-trusted[c][1], c))
+    best = trusted[ranked[0]][1]
+    named_best = [(c, r) for c, r in named if c in trusted and trusted[c][1] == best]
+    if named_best:
+        code, route = named_best[0]
+    elif len(ranked) == 1 or best >= MIN_MARGIN * trusted[ranked[1]][1]:
+        code, route = ranked[0], "content"
     else:
         link.route = "ambiguous"
         return link
@@ -323,24 +366,29 @@ def add_native_names(catalog: dict[str, Any], index: CardIndex,
     products = out.get("products") or []
     by_set: dict[Any, list[dict[str, Any]]] = defaultdict(list)
     for product in products:
+        if "nameNative" in product and not clean_name(product["nameNative"]):
+            del product["nameNative"]
         by_set[product.get("setId")].append(product)
     species_words = set(tokens.values())
     report = LinkReport(rows_total=len(products))
     for set_row in out.get("sets") or []:
-        rows = by_set.get(set_row.get("setId"), [])
-        link = resolve_set(set_row, rows, index, tokens)
+        set_products = by_set.get(set_row.get("setId"), [])
+        link = resolve_set(set_row, set_products, index, tokens)
         report.sets.append(link)
         if not link.trusted:
             continue
         cards = index[link.code]
-        for product in rows:
-            if clean_name(product.get("nameNative")):
+        for product in set_products:
+            if "nameNative" in product:
                 continue
-            card = _slot_card(cards.get(number_key(product.get("collectorNumber")) or ""))
-            if card and _row_accepts(card, str(product.get("name") or ""), tokens, species_words):
+            row = _row(product)
+            if row is None or not _row_in_code(row, link.code):
+                continue
+            card = _slot_card(cards.get(row.key))
+            if card and _row_accepts(card, row.words, tokens, species_words):
                 product["nameNative"] = card.name
                 link.named += 1
-    report.rows_named = sum(1 for p in products if clean_name(p.get("nameNative")))
+    report.rows_named = sum(1 for p in products if "nameNative" in p)
     return out, report
 
 
@@ -374,18 +422,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--report", type=Path, help="also write the per-set link report as JSON")
     parser.add_argument("--min-share", type=float, default=0.5,
                         help="fail when fewer than this share of rows get a name (default 0.5)")
-    parser.add_argument("--min-jp-cards", type=int, default=10000,
-                        help="fail when data_jp has fewer cards than this (default 10000)")
+    parser.add_argument("--min-jp-cards", type=int, default=20000,
+                        help="fail when data_jp has fewer cards than this (default 20000)")
+    parser.add_argument("--min-en-cards", type=int, default=18000,
+                        help="fail when data_en has fewer cards than this (default 18000)")
+    parser.add_argument("--min-species", type=int, default=1000,
+                        help="fail when data_en names fewer species than this (default 1000)")
     args = parser.parse_args(argv)
 
-    jp_records = load_ptcg_folder(args.ptcg_root / "data_jp")
-    en_records = load_ptcg_folder(args.ptcg_root / "data_en")
-    if len(jp_records) < args.min_jp_cards or not en_records:
-        print(f"error: PTCG-database checkout looks incomplete: {len(jp_records)} data_jp cards, "
-              f"{len(en_records)} data_en cards", file=sys.stderr)
+    jp_records, jp_skipped = load_ptcg_folder(args.ptcg_root / "data_jp")
+    en_records, en_skipped = load_ptcg_folder(args.ptcg_root / "data_en")
+    tokens = build_species_tokens(en_records)
+    print(f"PTCG-database: {len(jp_records)} data_jp cards ({jp_skipped} files skipped), "
+          f"{len(en_records)} data_en cards ({en_skipped} skipped), {len(tokens)} species words")
+    if (len(jp_records) < args.min_jp_cards or len(en_records) < args.min_en_cards
+            or len(tokens) < args.min_species):
+        print("error: PTCG-database checkout looks incomplete (see the counts above); "
+              "catalog not written", file=sys.stderr)
         return 1
     catalog = _read_catalog(args.catalog)
-    named, report = add_native_names(catalog, build_card_index(jp_records), build_species_tokens(en_records))
+    named, report = add_native_names(catalog, build_card_index(jp_records), tokens)
     print(_summary(report))
     if args.report:
         atomic_write_json(args.report, report.to_json())

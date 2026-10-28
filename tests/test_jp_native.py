@@ -244,7 +244,7 @@ def test_pokemon_row_with_other_species_is_refused_in_trusted_set(tokens):
     cards, (s, products) = big_set("SV11W", 1)
     products.append({"name": "Herdier (Master Ball Pattern)", "setId": 1, "collectorNumber": "005/020"})
     out, report = add_native_names(catalog_of((s, products)), build_card_index(cards), tokens)
-    assert (report.sets[0].compared, report.sets[0].agreed, report.sets[0].trusted) == (21, 20, True)
+    assert (report.sets[0].compared, report.sets[0].agreed, report.sets[0].trusted) == (20, 19, True)
     got = natives(out)
     assert got[(1, "005/020", "Eevee")] == SPECIES[133][1]
     assert got[(1, "005/020", "Herdier (Master Ball Pattern)")] is None
@@ -315,8 +315,11 @@ def test_load_ptcg_folder_reads_nested_json_and_skips_bad_files(tmp_path):
     (tmp_path / "SV2a" / "2.json").write_text("{not json", encoding="utf-8")
     (tmp_path / "SV2a" / "3.json").write_text("[1, 2]", encoding="utf-8")
     (tmp_path / "SV2a" / "notes.txt").write_text("x", encoding="utf-8")
-    recs = load_ptcg_folder(tmp_path)
-    assert [r["name"] for r in recs] == ["A"]
+    recs, skipped = load_ptcg_folder(tmp_path)
+    assert [r["name"] for r in recs] == ["A"] and skipped == 2
+
+
+SMALL = ["--min-jp-cards", "1", "--min-en-cards", "1", "--min-species", "1"]
 
 
 def write_ptcg(root, jp_records, en):
@@ -344,7 +347,7 @@ def test_main_writes_catalog_and_report(tmp_path, capsys):
     out = tmp_path / "out" / "pokemon-japan.json.gz"
     report = tmp_path / "report.json"
     code = main(["--catalog", str(src), "--ptcg-root", str(tmp_path / "ptcg"), "--output", str(out),
-                 "--report", str(report), "--min-share", "0.5", "--min-jp-cards", "1"])
+                 "--report", str(report), "--min-share", "0.5", *SMALL])
     assert code == 0
     assert natives(read_catalog(out))[(1, "001/007", "Bulbasaur")] == SPECIES[1][1]
     rep = json.loads(report.read_text(encoding="utf-8"))
@@ -357,7 +360,7 @@ def test_main_overwrites_input_when_no_output(tmp_path):
     write_ptcg(tmp_path / "ptcg", jp_set("SV2a"), en_records())
     src = tmp_path / "pokemon-japan.json.gz"
     write_catalog(src, catalog_of(tcg_set(1, "SV2a: X", "SV2a")))
-    assert main(["--catalog", str(src), "--ptcg-root", str(tmp_path / "ptcg"), "--min-jp-cards", "1"]) == 0
+    assert main(["--catalog", str(src), "--ptcg-root", str(tmp_path / "ptcg"), *SMALL]) == 0
     assert natives(read_catalog(src))[(1, "001/007", "Bulbasaur")] == SPECIES[1][1]
 
 
@@ -367,7 +370,7 @@ def test_main_fails_below_min_share_and_leaves_file_alone(tmp_path):
     src = tmp_path / "pokemon-japan.json.gz"
     write_catalog(src, catalog_of(tcg_set(1, "Unrelated", "")))
     before = src.read_bytes()
-    assert main(["--catalog", str(src), "--ptcg-root", str(tmp_path / "ptcg"), "--min-jp-cards", "1"]) == 1
+    assert main(["--catalog", str(src), "--ptcg-root", str(tmp_path / "ptcg"), *SMALL]) == 1
     assert src.read_bytes() == before
 
 
@@ -376,3 +379,106 @@ def test_main_fails_when_ptcg_folder_is_too_small(tmp_path):
     src = tmp_path / "pokemon-japan.json.gz"
     write_catalog(src, catalog_of(tcg_set(1, "SV2a: X", "SV2a")))
     assert main(["--catalog", str(src), "--ptcg-root", str(tmp_path / "ptcg")]) == 1
+
+
+def test_main_fails_when_data_en_is_too_small(tmp_path):
+    write_ptcg(tmp_path / "ptcg", jp_set("SV2a"), en_records())
+    src = tmp_path / "pokemon-japan.json.gz"
+    write_catalog(src, catalog_of(tcg_set(1, "SV2a: X", "SV2a")))
+    base = ["--catalog", str(src), "--ptcg-root", str(tmp_path / "ptcg"), "--min-jp-cards", "1"]
+    assert main(base + ["--min-en-cards", "100", "--min-species", "1"]) == 1
+    assert main(base + ["--min-en-cards", "1", "--min-species", "100"]) == 1
+
+
+ENERGY = "基本エネルギー"  # "Basic Energy"
+JP_LIGHTNING = "基本雷エネルギー"
+
+
+def test_energy_rows_and_energy_cards_only_link_to_each_other(tokens):
+    cards = jp_set("SV2a") + [jp_card("SV2a", "008", JP_LIGHTNING, None, ENERGY)]
+    s, products = tcg_set(1, "SV2a: X", "SV2a")
+    products += [
+        {"name": "Basic Darkness Energy", "setId": 1, "collectorNumber": "007/007"},  # trainer slot
+        {"name": "Lightning Energy", "setId": 1, "collectorNumber": "008/007"},
+        {"name": "Switch", "setId": 1, "collectorNumber": "008/007"},  # energy slot
+    ]
+    out, _ = add_native_names(catalog_of((s, products)), build_card_index(cards), tokens)
+    got = natives(out)
+    assert got[(1, "007/007", "Basic Darkness Energy")] is None
+    assert got[(1, "008/007", "Lightning Energy")] == JP_LIGHTNING
+    assert got[(1, "008/007", "Switch")] is None
+
+
+def test_row_numbered_in_another_set_is_refused(tokens):
+    s, products = tcg_set(1, "SV2a: X", "SV2a")
+    products.append({"name": "Professor's Research", "setId": 1, "collectorNumber": "007/DPt-P"})
+    out, _ = add_native_names(catalog_of((s, products)), build_card_index(jp_set("SV2a")), tokens)
+    got = natives(out)
+    assert got[(1, "007/DPt-P", "Professor's Research")] is None
+    assert got[(1, "007/007", "Professor's Research")] is not None
+
+
+def test_promo_suffix_matching_the_code_is_accepted(tokens):
+    cards = [dict(c, set_name="XYP") for c in jp_set("XYP")]
+    s, products = tcg_set(1, "XY-P: XY Promos", "XY-P")
+    for p in products:
+        p["collectorNumber"] = p["collectorNumber"].split("/")[0] + "/XY-P"
+    out, report = add_native_names(catalog_of((s, products)), build_card_index(cards), tokens)
+    assert report.sets[0].code == "XYP" and report.rows_named == 7
+
+
+def test_species_word_must_be_a_whole_word_outside_parentheses(tokens):
+    cards, (s, products) = big_set("SV2a", 1)
+    products += [
+        {"name": "Pikachuish", "setId": 1, "collectorNumber": "004/020"},
+        {"name": "Potion (Pikachu Stamped)", "setId": 1, "collectorNumber": "004/020"},
+        {"name": "Pikachu-GX", "setId": 1, "collectorNumber": "004/020"},
+        {"name": "Pikachu (Master Ball Pattern)", "setId": 1, "collectorNumber": "004/020"},
+    ]
+    out, _ = add_native_names(catalog_of((s, products)), build_card_index(cards), tokens)
+    got = natives(out)
+    assert got[(1, "004/020", "Pikachuish")] is None
+    assert got[(1, "004/020", "Potion (Pikachu Stamped)")] is None
+    assert got[(1, "004/020", "Pikachu-GX")] == SPECIES[25][1]
+    assert got[(1, "004/020", "Pikachu (Master Ball Pattern)")] == SPECIES[25][1]
+
+
+def test_nidoran_gender_letter_is_accepted(tokens):
+    cards = jp_set("SV2a") + [jp_card("SV2a", "008", "ニドラン♀", 29)]
+    s, products = tcg_set(1, "SV2a: X", "SV2a")
+    products += [{"name": "NidoranF", "setId": 1, "collectorNumber": "008/007"},
+                 {"name": "Nidoran F", "setId": 1, "collectorNumber": "008/007"}]
+    out, _ = add_native_names(catalog_of((s, products)), build_card_index(cards), tokens)
+    got = natives(out)
+    assert got[(1, "008/007", "NidoranF")] and got[(1, "008/007", "Nidoran F")]
+
+
+def test_trust_counts_distinct_numbers_not_variant_rows(tokens):
+    s, products = tcg_set(1, "SP1: Box", "SP1", total=3)
+    products = [p for p in products if p["collectorNumber"] != "007/007"]
+    products += [dict(p, name=p["name"] + " (Mirror Holofoil)") for p in products]
+    out, report = add_native_names(catalog_of((s, products)), build_card_index(jp_set("SP1")), tokens)
+    assert report.sets[0].compared == 3 and report.sets[0].trusted is False
+
+
+def test_two_trusted_codes_without_a_clear_margin_link_nothing(tokens):
+    small, _ = big_set("AAA", 1, rows=11)
+    cards, (s, products) = big_set("BBB", 1, rows=20)
+    s["name"], s["abbreviation"] = "Unnamed", ""
+    out, report = add_native_names(catalog_of((s, products)), build_card_index(small + cards), tokens)
+    assert report.sets[0].route == "ambiguous" and report.rows_named == 0
+
+
+def test_named_code_not_best_and_no_margin_links_nothing(tokens):
+    small, _ = big_set("XY6", 1, rows=11)
+    cards, (s, products) = big_set("XY6-B", 1, rows=20)
+    s["abbreviation"], s["name"] = "XY6", "XY6: Emerald Break"
+    out, report = add_native_names(catalog_of((s, products)), build_card_index(small + cards), tokens)
+    assert report.sets[0].route == "ambiguous" and report.rows_named == 0
+
+
+def test_blank_input_name_native_is_dropped(tokens):
+    s, products = tcg_set(1, "Unlinked", "")
+    products[0]["nameNative"] = "  "
+    out, _ = add_native_names(catalog_of((s, products)), build_card_index([]), tokens)
+    assert "nameNative" not in out["products"][0]
