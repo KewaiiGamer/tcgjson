@@ -10,6 +10,7 @@ from .bulk import assemble_release, build_release
 from .docs import generate_catalog_docs
 from .games import discover_game_support, write_game_support_report
 from .operations import DEFAULT_CONSTRAINTS_PATH, data_cache_delta_megabytes, evaluate_operations, evaluation_text
+from .ptcg_cli import PTCG_COMMANDS, register_ptcg_commands, run_ptcg_command
 from .tcgplayer import TCGplayerClient
 
 
@@ -128,12 +129,15 @@ def build_parser() -> argparse.ArgumentParser:
     evaluate.add_argument("--strict", action="store_true", help="Exit non-zero when operating targets are exceeded.")
     cache_delta = ops_subparsers.add_parser("cache-delta", help="Print uncommitted data-cache delta in MiB")
     cache_delta.add_argument("--data-cache-dir", type=Path, default=Path("data-cache"))
+    register_ptcg_commands(subparsers)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.command in PTCG_COMMANDS:
+        return run_ptcg_command(args)
     if args.command == "build":
         checkpoint_dir = None if args.no_checkpoints else args.checkpoint_dir or Path(".tcgjson-cache") / "set-checkpoints"
         detail_cache_dir = None
