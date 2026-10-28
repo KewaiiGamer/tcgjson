@@ -60,17 +60,21 @@ jobs:
           mkdir -p previous
           # Per asset: the newest extra-* release other than today's that holds it, so one release
           # without a language file never loses that language's baseline.
+          ok=""
           for attempt in 1 2 3; do
-            gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > releases.json && break
+            if gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > releases.json; then ok=1; break; fi
             sleep 20
           done
+          [ -n "$ok" ] || { echo "::error::listing the releases failed"; exit 1; }
           for asset in $LANGUAGE_ASSETS; do
             prev_tag="$(jq -r --arg tag "$TAG" --arg asset "$asset" '[.[] | select(.tag_name | startswith("extra-")) | select(.tag_name != $tag) | select([.assets[].name] | index($asset))][0].tag_name // ""' releases.json)"
             if [ -z "$prev_tag" ]; then echo "no earlier release holds $asset"; continue; fi
+            ok=""
             for attempt in 1 2 3; do
-              gh release download "$prev_tag" --repo "$GITHUB_REPOSITORY" --pattern "$asset" --dir previous --clobber && break
+              if gh release download "$prev_tag" --repo "$GITHUB_REPOSITORY" --pattern "$asset" --dir previous --clobber; then ok=1; break; fi
               sleep 20
             done
+            [ -n "$ok" ] || { echo "::error::downloading $asset from $prev_tag failed"; exit 1; }
             echo "$asset baseline: $prev_tag"
           done
       - name: Fetch PTCG-database (sparse, pinned in ptcg-database.lock)
