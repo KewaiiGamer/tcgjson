@@ -263,6 +263,10 @@ def trusted_sets(cards: Iterable[Card], japan: JapanLinks,
             trust[code] = "unknown"
         elif agreed[code] / compared[code] < TRUST_MIN_SHARE:
             trust[code] = "untrusted"
+        elif 0 < tp_compared[code] < TRUST_MIN_COMPARED:
+            # Too few Pokemon named by TCGplayer to tell whether it is the same product. (With
+            # none at all there is nothing to link from TCGplayer either, or no species table.)
+            trust[code] = "unknown"
         elif tp_compared[code] and tp_agreed[code] / tp_compared[code] < TRUST_MIN_SHARE:
             trust[code] = "untrusted"
         elif _totals_disagree(code, totals, print_codes, japan):

@@ -50,7 +50,8 @@ def test_tcgplayer_base_name_strips_numbers_and_variant_parentheses():
 
 def _tree(tmp_path):
     root = tmp_path / "ptcg"
-    write_species(root, {"pikachu": 25, "bulbasaur": 1})
+    write_species(root, {"pikachu": 25, "bulbasaur": 1, "mon2": 2, "mon3": 3, "mon4": 4,
+                         "mon5": 5})
     # English cards
     write_card(root, "en", "SV/SVI/1", name="Pikachu", number="1", card_type="Pokémon",
                print_key="en:SVI-1", card_key="25|60|1|A|10|1", pokedex_number=25)
@@ -164,10 +165,30 @@ def test_tcgplayer_side_mismatch_makes_a_set_untrusted(tmp_path):
     assert resolved["ko:M1/006"].source != "linked_ja"
 
 
+def test_tcgplayer_species_check_needs_five_named_pokemon(tmp_path):
+    root, japan = _tree(tmp_path)
+    write_species(root, {"pikachu": 25, "ivysaur": 2, "venusaur": 3, "charmander": 4,
+                         "charmeleon": 5})
+    # only 4 Korean M1 Pokemon have a TCGplayer name, all correct: too few -> unknown
+    write_japan_catalog(japan, [{"setId": 1, "name": "M1: Mega Brave", "abbreviation": "M1"}],
+                        [{"name": n + f" - {i:03d}/010", "setId": 1, "collectorNumber": f"{i:03d}/010"}
+                         for i, n in ((2, "Ivysaur"), (3, "Venusaur"), (4, "Charmander"),
+                                      (5, "Charmeleon"))])
+    ctx = _context(root, japan)
+    assert trusted_sets(load_language(root, "ko"), ctx.japan, ctx.species)["M1"] == "unknown"
+    # with the fifth one named correctly the set is trusted
+    write_japan_catalog(japan, [{"setId": 1, "name": "M1: Mega Brave", "abbreviation": "M1"}],
+                        [{"name": n + f" - {i:03d}/010", "setId": 1, "collectorNumber": f"{i:03d}/010"}
+                         for i, n in ((1, "Pikachu"), (2, "Ivysaur"), (3, "Venusaur"),
+                                      (4, "Charmander"), (5, "Charmeleon"))])
+    ctx = _context(root, japan)
+    assert trusted_sets(load_language(root, "ko"), ctx.japan, ctx.species)["M1"] == "trusted"
+
+
 def test_tcgplayer_printed_total_mismatch_makes_a_set_untrusted(tmp_path):
     root, japan = _tree(tmp_path)
     write_japan_catalog(japan, [{"setId": 1, "name": "M1: Mega Brave", "abbreviation": "M1"}],
-                        [{"name": f"Mon{n} - {n:03d}/012", "setId": 1,
+                        [{"name": f"Mon{n} - {n:03d}/012" if n > 1 else "Pikachu - 001/012", "setId": 1,
                           "collectorNumber": f"{n:03d}/012"} for n in range(1, 7)])
     ctx = _context(root, japan)
     assert trusted_sets(load_language(root, "ko"), ctx.japan, ctx.species)["M1"] == "untrusted"

@@ -301,6 +301,14 @@ def _read_previous(previous_dir: Path | None, lang: Language) -> dict | None:
     return data
 
 
+def _readable(path: Path) -> bool:
+    try:
+        with gzip.open(path, "rt", encoding="utf-8") as fh:
+            return isinstance(json.load(fh), dict)
+    except (OSError, ValueError, EOFError):
+        return False
+
+
 def renamed_since(previous: dict | None, products: list[dict]) -> dict[str, int]:
     """Rows whose name changed against the previous release, by their new nameSource."""
     if not previous:
@@ -392,7 +400,8 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
                                  "coverage": coverage_counts(
                                      [{"nameSource": r.source} for r in resolved])}
             old_file = Path(previous_dir) / lang.asset if previous_dir is not None else None
-            if carry_forward and old_file is not None and old_file.exists():
+            # Only a readable previous file is carried forward (never republish a corrupt one).
+            if carry_forward and old_file is not None and old_file.exists() and _readable(old_file):
                 shutil.copyfile(old_file, output / lang.asset)
                 report[lang.code]["carriedForward"] = True
             continue

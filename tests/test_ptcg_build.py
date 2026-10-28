@@ -12,7 +12,8 @@ from tcgjson.ptcg_import import LANGUAGE_BY_CODE
 
 def _korean_tree(tmp_path):
     root = tmp_path / "ptcg"
-    write_species(root, {"pikachu": 25})
+    # species names match the TCGplayer names, so the TCGplayer-side trust check passes
+    write_species(root, {"pikachu": 25, "mon1": 21, "mon2": 22, "mon3": 23, "mon4": 24})
     for n in range(1, 6):
         write_card(root, "jp", f"M1/{n}", name="j", number=f"{n:03d}", set_name="M1",
                    card_type="Pokémon", print_key=f"asia:M1-{n}", pokedex_number=n + 20, hp=60)
@@ -58,6 +59,7 @@ def test_build_writes_tcgjson_shape_with_extra_fields(tmp_path):
     assert mon1 == {
         "name": "Mon1",
         "nameNative": "몬1",
+        "nameAlias": "Mon1",
         "nameSource": "linked_ja",
         "sourceId": "ko:M1/001",
         "setId": sets["M1"]["setId"],
@@ -182,6 +184,12 @@ def test_corrupt_previous_file_fails_only_that_language(tmp_path):
     report = build_languages(root, tmp_path / "r", ["ko"], japan_catalog=japan,
                              translations_dir=None, tcgdex_snapshot=None, previous_dir=prev)
     assert "unreadable" in report["ko"]["error"]
+    # carry-forward never republishes the corrupt file
+    out = tmp_path / "r2"
+    report = build_languages(root, out, ["ko"], japan_catalog=japan, translations_dir=None,
+                             tcgdex_snapshot=None, previous_dir=prev, carry_forward=True)
+    assert "carriedForward" not in report["ko"]
+    assert not (out / "pokemon-korean.json.gz").exists()
 
 
 def test_renamed_rows_are_reported(tmp_path):
