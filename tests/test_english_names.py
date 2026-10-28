@@ -205,7 +205,9 @@ def test_resolve_names_routes(tmp_path):
     mon2 = resolved["ko:M1/002"]
     assert (mon2.name, mon2.source) == ("Mon2", "linked_ja")
     trainer = resolved["ko:M1/006"]
-    assert (trainer.name, trainer.source, trainer.alias) == ("Professor's Research", "linked_ja", None)
+    # Korean trainers are never linked through the Japanese card (different numbering): they
+    # fall through to the translation cache
+    assert (trainer.name, trainer.source, trainer.alias) == ("Professor's Research", "translated", None)
     # ambiguous card_key (Black/White Kyurem) and no Japanese card at 7: not linked
     kyurem = resolved["ko:M1/007"]
     assert kyurem.source == "native" and kyurem.name == "큐레무 EX"

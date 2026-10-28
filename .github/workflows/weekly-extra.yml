@@ -18,14 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 340
     env:
-      # Korean (ko) is paused pending the owner's decision on its linked_ja trainer links, so it
-      # is neither built nor carried forward.
-      PTCG_LANGUAGES: zh-tw,de,fr,es,it,pt
+      PTCG_LANGUAGES: ko,zh-tw,de,fr,es,it,pt
       # The converter assets this workflow publishes (built, or carried forward from the previous
       # release when the converter wrote none), plus the pinned copy of the Simplified Chinese
       # dataset JSON (ptcg-chs-infos.json.gz) that keeps the build alive if the source vanishes.
       LANGUAGE_ASSETS: >-
-        pokemon-chinese-traditional.json.gz pokemon-german.json.gz pokemon-french.json.gz
+        pokemon-korean.json.gz pokemon-chinese-traditional.json.gz pokemon-german.json.gz pokemon-french.json.gz
         pokemon-spanish.json.gz pokemon-italian.json.gz pokemon-portuguese.json.gz
         pokemon-chinese-simplified.json.gz ptcg-chs-infos.json.gz
     steps:

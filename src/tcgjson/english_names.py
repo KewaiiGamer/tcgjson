@@ -6,7 +6,7 @@ Routes, first hit wins, recorded as ``nameSource``:
    agree (ignoring case and punctuation); European languages then TCGdex's English edition at the
    same set id and number.
 2. ``linked_ja`` (Korean, Traditional Chinese): the Japanese card at the same set code and number,
-   named by TCGplayer Japan, only in a trusted set.
+   named by TCGplayer Japan, only in a trusted set (Korean: Pokemon cards only).
 3. ``translated``: hand overrides, then the committed translation cache.
 4. ``native``: the native name.
 """
@@ -322,6 +322,11 @@ def link_ja(card: Card, ctx: NameContext, trust: dict[str, str]) -> str | None:
     if ctx.language.group != "asia" or ctx.japan is None:
         return None
     if trust.get(card.set_code) != "trusted":
+        return None
+    if ctx.language.code == "ko" and not card.dex:
+        # Korean editions number trainers and energy differently from the Japanese ones, so the
+        # same set code and number often names another card; only Pokemon (checked below by
+        # Pokedex number and species word) are linked.
         return None
     key = _japan_key(card.print_key)
     jp_cards = ctx.japan.jp_by_print.get(key, []) if key else []
