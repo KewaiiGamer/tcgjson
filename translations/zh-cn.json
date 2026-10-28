@@ -1,0 +1,2027 @@
+{
+ "energy|V防守能量": {
+  "date": "2026-10-28",
+  "en": "V Guard Energy",
+  "source": "glossary"
+ },
+ "energy|夜光能量": {
+  "date": "2026-10-28",
+  "en": "Luminous Energy",
+  "source": "glossary"
+ },
+ "energy|富裕能量": {
+  "date": "2026-10-28",
+  "en": "Rich Energy",
+  "source": "glossary"
+ },
+ "energy|螺旋能量": {
+  "date": "2026-10-28",
+  "en": "Spiral Energy",
+  "source": "glossary"
+ },
+ "pokemon|M沙奈朵EX": {
+  "date": "2026-10-28",
+  "en": "M Gardevoir EX",
+  "source": "glossary"
+ },
+ "pokemon|一家鼠ex": {
+  "date": "2026-10-28",
+  "en": "Maushold ex",
+  "source": "glossary"
+ },
+ "pokemon|三海地鼠ex": {
+  "date": "2026-10-28",
+  "en": "Wugtrio ex",
+  "source": "glossary"
+ },
+ "pokemon|九尾": {
+  "date": "2026-10-28",
+  "en": "Ninetales",
+  "source": "glossary"
+ },
+ "pokemon|九尾ex": {
+  "date": "2026-10-28",
+  "en": "Ninetales ex",
+  "source": "glossary"
+ },
+ "pokemon|仙子伊布": {
+  "date": "2026-10-28",
+  "en": "Sylveon",
+  "source": "glossary"
+ },
+ "pokemon|仙子伊布V": {
+  "date": "2026-10-28",
+  "en": "Sylveon V",
+  "source": "glossary"
+ },
+ "pokemon|仙子伊布VMAX": {
+  "date": "2026-10-28",
+  "en": "Sylveon VMAX",
+  "source": "glossary"
+ },
+ "pokemon|仙子伊布ex": {
+  "date": "2026-10-28",
+  "en": "Sylveon ex",
+  "source": "glossary"
+ },
+ "pokemon|伊布": {
+  "date": "2026-10-28",
+  "en": "Eevee",
+  "source": "glossary"
+ },
+ "pokemon|伊布V": {
+  "date": "2026-10-28",
+  "en": "Eevee V",
+  "source": "glossary"
+ },
+ "pokemon|伊布VMAX": {
+  "date": "2026-10-28",
+  "en": "Eevee VMAX",
+  "source": "glossary"
+ },
+ "pokemon|伊布ex": {
+  "date": "2026-10-28",
+  "en": "Eevee ex",
+  "source": "glossary"
+ },
+ "pokemon|优雅猫": {
+  "date": "2026-10-28",
+  "en": "Delcatty",
+  "source": "glossary"
+ },
+ "pokemon|伽勒尔 喵喵": {
+  "date": "2026-10-28",
+  "en": "Galarian Meowth",
+  "source": "glossary"
+ },
+ "pokemon|伽勒尔 小火马": {
+  "date": "2026-10-28",
+  "en": "Galarian Ponyta",
+  "source": "glossary"
+ },
+ "pokemon|伽勒尔 急冻鸟": {
+  "date": "2026-10-28",
+  "en": "Galarian Articuno",
+  "source": "glossary"
+ },
+ "pokemon|伽勒尔 火焰鸟": {
+  "date": "2026-10-28",
+  "en": "Galarian Moltres",
+  "source": "glossary"
+ },
+ "pokemon|伽勒尔 达摩狒狒": {
+  "date": "2026-10-28",
+  "en": "Galarian Darmanitan",
+  "source": "glossary"
+ },
+ "pokemon|佛烈托斯ex": {
+  "date": "2026-10-28",
+  "en": "Forretress ex",
+  "source": "glossary"
+ },
+ "pokemon|修建老匠V": {
+  "date": "2026-10-28",
+  "en": "Conkeldurr V",
+  "source": "glossary"
+ },
+ "pokemon|具甲武者GX": {
+  "date": "2026-10-28",
+  "en": "Golisopod GX",
+  "source": "glossary"
+ },
+ "pokemon|具甲武者ex": {
+  "date": "2026-10-28",
+  "en": "Golisopod ex",
+  "source": "glossary"
+ },
+ "pokemon|冰伊布GX": {
+  "date": "2026-10-28",
+  "en": "Glaceon GX",
+  "source": "glossary"
+ },
+ "pokemon|冰伊布V": {
+  "date": "2026-10-28",
+  "en": "Glaceon V",
+  "source": "glossary"
+ },
+ "pokemon|冰伊布VMAX": {
+  "date": "2026-10-28",
+  "en": "Glaceon VMAX",
+  "source": "glossary"
+ },
+ "pokemon|冰伊布VSTAR": {
+  "date": "2026-10-28",
+  "en": "Glaceon VSTAR",
+  "source": "glossary"
+ },
+ "pokemon|冰伊布ex": {
+  "date": "2026-10-28",
+  "en": "Glaceon ex",
+  "source": "glossary"
+ },
+ "pokemon|劈斧螳螂V": {
+  "date": "2026-10-28",
+  "en": "Kleavor V",
+  "source": "glossary"
+ },
+ "pokemon|劈斧螳螂VSTAR": {
+  "date": "2026-10-28",
+  "en": "Kleavor VSTAR",
+  "source": "glossary"
+ },
+ "pokemon|化石翼龙": {
+  "date": "2026-10-28",
+  "en": "Aerodactyl",
+  "source": "glossary"
+ },
+ "pokemon|千面避役V": {
+  "date": "2026-10-28",
+  "en": "Inteleon V",
+  "source": "glossary"
+ },
+ "pokemon|千面避役VMAX": {
+  "date": "2026-10-28",
+  "en": "Inteleon VMAX",
+  "source": "glossary"
+ },
+ "pokemon|卡咪龟": {
+  "date": "2026-10-28",
+  "en": "Wartortle",
+  "source": "glossary"
+ },
+ "pokemon|卡拉卡拉": {
+  "date": "2026-10-28",
+  "en": "Cubone",
+  "source": "glossary"
+ },
+ "pokemon|卡比兽": {
+  "date": "2026-10-28",
+  "en": "Snorlax",
+  "source": "glossary"
+ },
+ "pokemon|卡璞・哞哞GX": {
+  "date": "2026-10-28",
+  "en": "Tapu Bulu GX",
+  "source": "glossary"
+ },
+ "pokemon|卡璞・鸣鸣ex": {
+  "date": "2026-10-28",
+  "en": "Tapu Koko ex",
+  "source": "glossary"
+ },
+ "pokemon|叉字蝠V": {
+  "date": "2026-10-28",
+  "en": "Crobat V",
+  "source": "glossary"
+ },
+ "pokemon|叉字蝠VMAX": {
+  "date": "2026-10-28",
+  "en": "Crobat VMAX",
+  "source": "glossary"
+ },
+ "pokemon|古鼎鹿ex": {
+  "date": "2026-10-28",
+  "en": "Ting-Lu ex",
+  "source": "glossary"
+ },
+ "pokemon|叶伊布": {
+  "date": "2026-10-28",
+  "en": "Leafeon",
+  "source": "glossary"
+ },
+ "pokemon|吃吼霸ex": {
+  "date": "2026-10-28",
+  "en": "Dondozo ex",
+  "source": "glossary"
+ },
+ "pokemon|君主蛇V": {
+  "date": "2026-10-28",
+  "en": "Serperior V",
+  "source": "glossary"
+ },
+ "pokemon|君主蛇VSTAR": {
+  "date": "2026-10-28",
+  "en": "Serperior VSTAR",
+  "source": "glossary"
+ },
+ "pokemon|吼叫尾ex": {
+  "date": "2026-10-28",
+  "en": "Scream Tail ex",
+  "source": "glossary"
+ },
+ "pokemon|呆呆兽": {
+  "date": "2026-10-28",
+  "en": "Slowpoke",
+  "source": "glossary"
+ },
+ "pokemon|呆呆王ex": {
+  "date": "2026-10-28",
+  "en": "Slowking ex",
+  "source": "glossary"
+ },
+ "pokemon|呆壳兽": {
+  "date": "2026-10-28",
+  "en": "Slowbro",
+  "source": "glossary"
+ },
+ "pokemon|呆火鳄": {
+  "date": "2026-10-28",
+  "en": "Fuecoco",
+  "source": "glossary"
+ },
+ "pokemon|呱呱泡蛙": {
+  "date": "2026-10-28",
+  "en": "Froakie",
+  "source": "glossary"
+ },
+ "pokemon|咚咚鼠GX": {
+  "date": "2026-10-28",
+  "en": "Dedenne GX",
+  "source": "glossary"
+ },
+ "pokemon|咚咚鼠ex": {
+  "date": "2026-10-28",
+  "en": "Dedenne ex",
+  "source": "glossary"
+ },
+ "pokemon|哈力栗": {
+  "date": "2026-10-28",
+  "en": "Chespin",
+  "source": "glossary"
+ },
+ "pokemon|啃果虫": {
+  "date": "2026-10-28",
+  "en": "Applin",
+  "source": "glossary"
+ },
+ "pokemon|喇叭芽": {
+  "date": "2026-10-28",
+  "en": "Bellsprout",
+  "source": "glossary"
+ },
+ "pokemon|喵喵": {
+  "date": "2026-10-28",
+  "en": "Meowth",
+  "source": "glossary"
+ },
+ "pokemon|喵喵V": {
+  "date": "2026-10-28",
+  "en": "Meowth V",
+  "source": "glossary"
+ },
+ "pokemon|喵喵VMAX": {
+  "date": "2026-10-28",
+  "en": "Meowth VMAX",
+  "source": "glossary"
+ },
+ "pokemon|喷火龙": {
+  "date": "2026-10-28",
+  "en": "Charizard",
+  "source": "glossary"
+ },
+ "pokemon|土狼犬": {
+  "date": "2026-10-28",
+  "en": "Poochyena",
+  "source": "glossary"
+ },
+ "pokemon|坦克臭鼬V": {
+  "date": "2026-10-28",
+  "en": "Skuntank V",
+  "source": "glossary"
+ },
+ "pokemon|基拉祈V": {
+  "date": "2026-10-28",
+  "en": "Jirachi V",
+  "source": "glossary"
+ },
+ "pokemon|基拉祈ex": {
+  "date": "2026-10-28",
+  "en": "Jirachi ex",
+  "source": "glossary"
+ },
+ "pokemon|大吾的巨金怪ex": {
+  "date": "2026-10-28",
+  "en": "Steven's Metagross ex",
+  "source": "glossary"
+ },
+ "pokemon|大嘴娃V": {
+  "date": "2026-10-28",
+  "en": "Mawile V",
+  "source": "glossary"
+ },
+ "pokemon|大嘴娃VSTAR": {
+  "date": "2026-10-28",
+  "en": "Mawile VSTAR",
+  "source": "glossary"
+ },
+ "pokemon|大尾狸": {
+  "date": "2026-10-28",
+  "en": "Bibarel",
+  "source": "glossary"
+ },
+ "pokemon|大岩蛇GX": {
+  "date": "2026-10-28",
+  "en": "Onix GX",
+  "source": "glossary"
+ },
+ "pokemon|奇树的电肚蛙ex": {
+  "date": "2026-10-28",
+  "en": "Iono's Bellibolt ex",
+  "source": "glossary"
+ },
+ "pokemon|奇麒麟ex": {
+  "date": "2026-10-28",
+  "en": "Farigiraf ex",
+  "source": "glossary"
+ },
+ "pokemon|好啦鱿": {
+  "date": "2026-10-28",
+  "en": "Inkay",
+  "source": "glossary"
+ },
+ "pokemon|妙蛙种子": {
+  "date": "2026-10-28",
+  "en": "Bulbasaur",
+  "source": "glossary"
+ },
+ "pokemon|妙蛙花": {
+  "date": "2026-10-28",
+  "en": "Venusaur",
+  "source": "glossary"
+ },
+ "pokemon|妙蛙花V": {
+  "date": "2026-10-28",
+  "en": "Venusaur V",
+  "source": "glossary"
+ },
+ "pokemon|妙蛙花VMAX": {
+  "date": "2026-10-28",
+  "en": "Venusaur VMAX",
+  "source": "glossary"
+ },
+ "pokemon|妙蛙花ex": {
+  "date": "2026-10-28",
+  "en": "Venusaur ex",
+  "source": "glossary"
+ },
+ "pokemon|妙蛙草": {
+  "date": "2026-10-28",
+  "en": "Ivysaur",
+  "source": "glossary"
+ },
+ "pokemon|宝贝龙": {
+  "date": "2026-10-28",
+  "en": "Bagon",
+  "source": "glossary"
+ },
+ "pokemon|小火马": {
+  "date": "2026-10-28",
+  "en": "Ponyta",
+  "source": "glossary"
+ },
+ "pokemon|小火龙": {
+  "date": "2026-10-28",
+  "en": "Charmander",
+  "source": "glossary"
+ },
+ "pokemon|小锯鳄": {
+  "date": "2026-10-28",
+  "en": "Totodile",
+  "source": "glossary"
+ },
+ "pokemon|尼多兰": {
+  "date": "2026-10-28",
+  "en": "Nidoran Female",
+  "source": "glossary"
+ },
+ "pokemon|巨炭山V": {
+  "date": "2026-10-28",
+  "en": "Coalossal V",
+  "source": "glossary"
+ },
+ "pokemon|巨炭山VMAX": {
+  "date": "2026-10-28",
+  "en": "Coalossal VMAX",
+  "source": "glossary"
+ },
+ "pokemon|巨石丁V": {
+  "date": "2026-10-28",
+  "en": "Stonjourner V",
+  "source": "glossary"
+ },
+ "pokemon|巨金怪": {
+  "date": "2026-10-28",
+  "en": "Metagross",
+  "source": "glossary"
+ },
+ "pokemon|巨金怪V": {
+  "date": "2026-10-28",
+  "en": "Metagross V",
+  "source": "glossary"
+ },
+ "pokemon|巨金怪VMAX": {
+  "date": "2026-10-28",
+  "en": "Metagross VMAX",
+  "source": "glossary"
+ },
+ "pokemon|巴大蝶VMAX": {
+  "date": "2026-10-28",
+  "en": "Butterfree VMAX",
+  "source": "glossary"
+ },
+ "pokemon|布里卡隆V": {
+  "date": "2026-10-28",
+  "en": "Chesnaught V",
+  "source": "glossary"
+ },
+ "pokemon|帕底亚 肯泰罗": {
+  "date": "2026-10-28",
+  "en": "Paldean Tauros",
+  "source": "glossary"
+ },
+ "pokemon|帝王拿波V": {
+  "date": "2026-10-28",
+  "en": "Empoleon V",
+  "source": "glossary"
+ },
+ "pokemon|幸福蛋V": {
+  "date": "2026-10-28",
+  "en": "Blissey V",
+  "source": "glossary"
+ },
+ "pokemon|幸福蛋ex": {
+  "date": "2026-10-28",
+  "en": "Blissey ex",
+  "source": "glossary"
+ },
+ "pokemon|急冻鸟": {
+  "date": "2026-10-28",
+  "en": "Articuno",
+  "source": "glossary"
+ },
+ "pokemon|怪力GX": {
+  "date": "2026-10-28",
+  "en": "Machamp GX",
+  "source": "glossary"
+ },
+ "pokemon|怪力V": {
+  "date": "2026-10-28",
+  "en": "Machamp V",
+  "source": "glossary"
+ },
+ "pokemon|怪力VMAX": {
+  "date": "2026-10-28",
+  "en": "Machamp VMAX",
+  "source": "glossary"
+ },
+ "pokemon|恰雷姆V": {
+  "date": "2026-10-28",
+  "en": "Medicham V",
+  "source": "glossary"
+ },
+ "pokemon|恰雷姆ex": {
+  "date": "2026-10-28",
+  "en": "Medicham ex",
+  "source": "glossary"
+ },
+ "pokemon|拉普拉斯V": {
+  "date": "2026-10-28",
+  "en": "Lapras V",
+  "source": "glossary"
+ },
+ "pokemon|拉普拉斯VMAX": {
+  "date": "2026-10-28",
+  "en": "Lapras VMAX",
+  "source": "glossary"
+ },
+ "pokemon|拉普拉斯ex": {
+  "date": "2026-10-28",
+  "en": "Lapras ex",
+  "source": "glossary"
+ },
+ "pokemon|拖拖蚓ex": {
+  "date": "2026-10-28",
+  "en": "Orthworm ex",
+  "source": "glossary"
+ },
+ "pokemon|捷拉奥拉": {
+  "date": "2026-10-28",
+  "en": "Zeraora",
+  "source": "glossary"
+ },
+ "pokemon|摩托蜥ex": {
+  "date": "2026-10-28",
+  "en": "Cyclizar ex",
+  "source": "glossary"
+ },
+ "pokemon|操陷蛛ex": {
+  "date": "2026-10-28",
+  "en": "Spidops ex",
+  "source": "glossary"
+ },
+ "pokemon|敲音猴": {
+  "date": "2026-10-28",
+  "en": "Grookey",
+  "source": "glossary"
+ },
+ "pokemon|新叶喵": {
+  "date": "2026-10-28",
+  "en": "Sprigatito",
+  "source": "glossary"
+ },
+ "pokemon|普隆隆姆ex": {
+  "date": "2026-10-28",
+  "en": "Revavroom ex",
+  "source": "glossary"
+ },
+ "pokemon|晶光花ex": {
+  "date": "2026-10-28",
+  "en": "Glimmora ex",
+  "source": "glossary"
+ },
+ "pokemon|暖暖猪": {
+  "date": "2026-10-28",
+  "en": "Tepig",
+  "source": "glossary"
+ },
+ "pokemon|月亮伊布": {
+  "date": "2026-10-28",
+  "en": "Umbreon",
+  "source": "glossary"
+ },
+ "pokemon|月亮伊布V": {
+  "date": "2026-10-28",
+  "en": "Umbreon V",
+  "source": "glossary"
+ },
+ "pokemon|月亮伊布VMAX": {
+  "date": "2026-10-28",
+  "en": "Umbreon VMAX",
+  "source": "glossary"
+ },
+ "pokemon|月亮伊布ex": {
+  "date": "2026-10-28",
+  "en": "Umbreon ex",
+  "source": "glossary"
+ },
+ "pokemon|月月熊 赫月ex": {
+  "date": "2026-10-28",
+  "en": "Bloodmoon Ursaluna ex",
+  "source": "glossary"
+ },
+ "pokemon|木守宫": {
+  "date": "2026-10-28",
+  "en": "Treecko",
+  "source": "glossary"
+ },
+ "pokemon|朽木妖V": {
+  "date": "2026-10-28",
+  "en": "Trevenant V",
+  "source": "glossary"
+ },
+ "pokemon|朽木妖VMAX": {
+  "date": "2026-10-28",
+  "en": "Trevenant VMAX",
+  "source": "glossary"
+ },
+ "pokemon|来悲茶": {
+  "date": "2026-10-28",
+  "en": "Sinistea",
+  "source": "glossary"
+ },
+ "pokemon|杰尼龟": {
+  "date": "2026-10-28",
+  "en": "Squirtle",
+  "source": "glossary"
+ },
+ "pokemon|桃歹郎ex": {
+  "date": "2026-10-28",
+  "en": "Pecharunt ex",
+  "source": "glossary"
+ },
+ "pokemon|梦幻": {
+  "date": "2026-10-28",
+  "en": "Mew",
+  "source": "glossary"
+ },
+ "pokemon|毒粉蛾": {
+  "date": "2026-10-28",
+  "en": "Dustox",
+  "source": "glossary"
+ },
+ "pokemon|毒骷蛙ex": {
+  "date": "2026-10-28",
+  "en": "Toxicroak ex",
+  "source": "glossary"
+ },
+ "pokemon|比克提尼": {
+  "date": "2026-10-28",
+  "en": "Victini",
+  "source": "glossary"
+ },
+ "pokemon|比克提尼V": {
+  "date": "2026-10-28",
+  "en": "Victini V",
+  "source": "glossary"
+ },
+ "pokemon|比克提尼VMAX": {
+  "date": "2026-10-28",
+  "en": "Victini VMAX",
+  "source": "glossary"
+ },
+ "pokemon|比克提尼ex": {
+  "date": "2026-10-28",
+  "en": "Victini ex",
+  "source": "glossary"
+ },
+ "pokemon|毛毛角羊V": {
+  "date": "2026-10-28",
+  "en": "Dubwool V",
+  "source": "glossary"
+ },
+ "pokemon|水伊布V": {
+  "date": "2026-10-28",
+  "en": "Vaporeon V",
+  "source": "glossary"
+ },
+ "pokemon|水伊布ex": {
+  "date": "2026-10-28",
+  "en": "Vaporeon ex",
+  "source": "glossary"
+ },
+ "pokemon|水君GX": {
+  "date": "2026-10-28",
+  "en": "Suicune GX",
+  "source": "glossary"
+ },
+ "pokemon|水君V": {
+  "date": "2026-10-28",
+  "en": "Suicune V",
+  "source": "glossary"
+ },
+ "pokemon|水水獭": {
+  "date": "2026-10-28",
+  "en": "Oshawott",
+  "source": "glossary"
+ },
+ "pokemon|水箭龟": {
+  "date": "2026-10-28",
+  "en": "Blastoise",
+  "source": "glossary"
+ },
+ "pokemon|水跃鱼": {
+  "date": "2026-10-28",
+  "en": "Mudkip",
+  "source": "glossary"
+ },
+ "pokemon|沙奈朵V": {
+  "date": "2026-10-28",
+  "en": "Gardevoir V",
+  "source": "glossary"
+ },
+ "pokemon|沙奈朵VMAX": {
+  "date": "2026-10-28",
+  "en": "Gardevoir VMAX",
+  "source": "glossary"
+ },
+ "pokemon|沙奈朵ex": {
+  "date": "2026-10-28",
+  "en": "Gardevoir ex",
+  "source": "glossary"
+ },
+ "pokemon|沙漠蜻蜓GX": {
+  "date": "2026-10-28",
+  "en": "Flygon GX",
+  "source": "glossary"
+ },
+ "pokemon|沙漠蜻蜓V": {
+  "date": "2026-10-28",
+  "en": "Flygon V",
+  "source": "glossary"
+ },
+ "pokemon|沙漠蜻蜓ex": {
+  "date": "2026-10-28",
+  "en": "Flygon ex",
+  "source": "glossary"
+ },
+ "pokemon|沙螺蟒V": {
+  "date": "2026-10-28",
+  "en": "Sandaconda V",
+  "source": "glossary"
+ },
+ "pokemon|沙螺蟒VMAX": {
+  "date": "2026-10-28",
+  "en": "Sandaconda VMAX",
+  "source": "glossary"
+ },
+ "pokemon|波克基斯V": {
+  "date": "2026-10-28",
+  "en": "Togekiss V",
+  "source": "glossary"
+ },
+ "pokemon|波克基斯VMAX": {
+  "date": "2026-10-28",
+  "en": "Togekiss VMAX",
+  "source": "glossary"
+ },
+ "pokemon|波加曼": {
+  "date": "2026-10-28",
+  "en": "Piplup",
+  "source": "glossary"
+ },
+ "pokemon|波士可多拉V": {
+  "date": "2026-10-28",
+  "en": "Aggron V",
+  "source": "glossary"
+ },
+ "pokemon|波士可多拉VMAX": {
+  "date": "2026-10-28",
+  "en": "Aggron VMAX",
+  "source": "glossary"
+ },
+ "pokemon|波普海豚": {
+  "date": "2026-10-28",
+  "en": "Finizen",
+  "source": "glossary"
+ },
+ "pokemon|泥偶巨人V": {
+  "date": "2026-10-28",
+  "en": "Golurk V",
+  "source": "glossary"
+ },
+ "pokemon|泪眼蜥": {
+  "date": "2026-10-28",
+  "en": "Sobble",
+  "source": "glossary"
+ },
+ "pokemon|洗翠 大狃拉V": {
+  "date": "2026-10-28",
+  "en": "Hisuian Sneasler V",
+  "source": "glossary"
+ },
+ "pokemon|洗翠 索罗亚": {
+  "date": "2026-10-28",
+  "en": "Hisuian Zorua",
+  "source": "glossary"
+ },
+ "pokemon|洗翠 索罗亚克": {
+  "date": "2026-10-28",
+  "en": "Hisuian Zoroark",
+  "source": "glossary"
+ },
+ "pokemon|洛托姆V": {
+  "date": "2026-10-28",
+  "en": "Rotom V",
+  "source": "glossary"
+ },
+ "pokemon|洛托姆VSTAR": {
+  "date": "2026-10-28",
+  "en": "Rotom VSTAR",
+  "source": "glossary"
+ },
+ "pokemon|涂标客": {
+  "date": "2026-10-28",
+  "en": "Grafaiai",
+  "source": "glossary"
+ },
+ "pokemon|涌跃鸭": {
+  "date": "2026-10-28",
+  "en": "Quaxwell",
+  "source": "glossary"
+ },
+ "pokemon|润水鸭": {
+  "date": "2026-10-28",
+  "en": "Quaxly",
+  "source": "glossary"
+ },
+ "pokemon|火伊布GX": {
+  "date": "2026-10-28",
+  "en": "Flareon GX",
+  "source": "glossary"
+ },
+ "pokemon|火伊布V": {
+  "date": "2026-10-28",
+  "en": "Flareon V",
+  "source": "glossary"
+ },
+ "pokemon|火伊布VMAX": {
+  "date": "2026-10-28",
+  "en": "Flareon VMAX",
+  "source": "glossary"
+ },
+ "pokemon|火伊布ex": {
+  "date": "2026-10-28",
+  "en": "Flareon ex",
+  "source": "glossary"
+ },
+ "pokemon|火恐龙": {
+  "date": "2026-10-28",
+  "en": "Charmeleon",
+  "source": "glossary"
+ },
+ "pokemon|火斑喵": {
+  "date": "2026-10-28",
+  "en": "Litten",
+  "source": "glossary"
+ },
+ "pokemon|火焰鸟": {
+  "date": "2026-10-28",
+  "en": "Moltres",
+  "source": "glossary"
+ },
+ "pokemon|火狐狸": {
+  "date": "2026-10-28",
+  "en": "Fennekin",
+  "source": "glossary"
+ },
+ "pokemon|火球鼠": {
+  "date": "2026-10-28",
+  "en": "Cyndaquil",
+  "source": "glossary"
+ },
+ "pokemon|火神蛾V": {
+  "date": "2026-10-28",
+  "en": "Volcarona V",
+  "source": "glossary"
+ },
+ "pokemon|火稚鸡": {
+  "date": "2026-10-28",
+  "en": "Torchic",
+  "source": "glossary"
+ },
+ "pokemon|炎兔儿": {
+  "date": "2026-10-28",
+  "en": "Scorbunny",
+  "source": "glossary"
+ },
+ "pokemon|炎帝V": {
+  "date": "2026-10-28",
+  "en": "Entei V",
+  "source": "glossary"
+ },
+ "pokemon|炙烫鳄": {
+  "date": "2026-10-28",
+  "en": "Crocalor",
+  "source": "glossary"
+ },
+ "pokemon|烈空坐EX": {
+  "date": "2026-10-28",
+  "en": "Rayquaza EX",
+  "source": "glossary"
+ },
+ "pokemon|烈空坐V": {
+  "date": "2026-10-28",
+  "en": "Rayquaza V",
+  "source": "glossary"
+ },
+ "pokemon|烈空坐VMAX": {
+  "date": "2026-10-28",
+  "en": "Rayquaza VMAX",
+  "source": "glossary"
+ },
+ "pokemon|焚焰蚣V": {
+  "date": "2026-10-28",
+  "en": "Centiskorch V",
+  "source": "glossary"
+ },
+ "pokemon|焚焰蚣VMAX": {
+  "date": "2026-10-28",
+  "en": "Centiskorch VMAX",
+  "source": "glossary"
+ },
+ "pokemon|焰白酋雷姆GX": {
+  "date": "2026-10-28",
+  "en": "White Kyurem GX",
+  "source": "glossary"
+ },
+ "pokemon|爆肌蚊GX": {
+  "date": "2026-10-28",
+  "en": "Buzzwole GX",
+  "source": "glossary"
+ },
+ "pokemon|爆香猿V": {
+  "date": "2026-10-28",
+  "en": "Simisear V",
+  "source": "glossary"
+ },
+ "pokemon|爆香猿VSTAR": {
+  "date": "2026-10-28",
+  "en": "Simisear VSTAR",
+  "source": "glossary"
+ },
+ "pokemon|狠辣椒ex": {
+  "date": "2026-10-28",
+  "en": "Scovillain ex",
+  "source": "glossary"
+ },
+ "pokemon|猛雷鼓ex": {
+  "date": "2026-10-28",
+  "en": "Raging Bolt ex",
+  "source": "glossary"
+ },
+ "pokemon|獒教父ex": {
+  "date": "2026-10-28",
+  "en": "Mabosstiff ex",
+  "source": "glossary"
+ },
+ "pokemon|玛俐的长毛巨魔ex": {
+  "date": "2026-10-28",
+  "en": "Marnie's Grimmsnarl ex",
+  "source": "glossary"
+ },
+ "pokemon|班基拉斯GX": {
+  "date": "2026-10-28",
+  "en": "Tyranitar GX",
+  "source": "glossary"
+ },
+ "pokemon|班基拉斯V": {
+  "date": "2026-10-28",
+  "en": "Tyranitar V",
+  "source": "glossary"
+ },
+ "pokemon|班基拉斯ex": {
+  "date": "2026-10-28",
+  "en": "Tyranitar ex",
+  "source": "glossary"
+ },
+ "pokemon|甜冷美后V": {
+  "date": "2026-10-28",
+  "en": "Tsareena V",
+  "source": "glossary"
+ },
+ "pokemon|甜冷美后ex": {
+  "date": "2026-10-28",
+  "en": "Tsareena ex",
+  "source": "glossary"
+ },
+ "pokemon|白蓬蓬V": {
+  "date": "2026-10-28",
+  "en": "Eldegoss V",
+  "source": "glossary"
+ },
+ "pokemon|百变怪": {
+  "date": "2026-10-28",
+  "en": "Ditto",
+  "source": "glossary"
+ },
+ "pokemon|皮卡丘": {
+  "date": "2026-10-28",
+  "en": "Pikachu",
+  "source": "glossary"
+ },
+ "pokemon|皮卡丘V": {
+  "date": "2026-10-28",
+  "en": "Pikachu V",
+  "source": "glossary"
+ },
+ "pokemon|皮卡丘V-UNION": {
+  "date": "2026-10-28",
+  "en": "Pikachu V-UNION (Top Left)",
+  "source": "glossary"
+ },
+ "pokemon|皮卡丘VMAX": {
+  "date": "2026-10-28",
+  "en": "Pikachu VMAX",
+  "source": "glossary"
+ },
+ "pokemon|皮卡丘ex": {
+  "date": "2026-10-28",
+  "en": "Pikachu ex",
+  "source": "glossary"
+ },
+ "pokemon|皮可西ex": {
+  "date": "2026-10-28",
+  "en": "Clefable ex",
+  "source": "glossary"
+ },
+ "pokemon|皮宝宝": {
+  "date": "2026-10-28",
+  "en": "Cleffa",
+  "source": "glossary"
+ },
+ "pokemon|破空焰ex": {
+  "date": "2026-10-28",
+  "en": "Gouging Fire ex",
+  "source": "glossary"
+ },
+ "pokemon|索罗亚克": {
+  "date": "2026-10-28",
+  "en": "Zoroark",
+  "source": "glossary"
+ },
+ "pokemon|美纳斯": {
+  "date": "2026-10-28",
+  "en": "Milotic",
+  "source": "glossary"
+ },
+ "pokemon|耿鬼": {
+  "date": "2026-10-28",
+  "en": "Gengar",
+  "source": "glossary"
+ },
+ "pokemon|耿鬼V": {
+  "date": "2026-10-28",
+  "en": "Gengar V",
+  "source": "glossary"
+ },
+ "pokemon|耿鬼VMAX": {
+  "date": "2026-10-28",
+  "en": "Gengar VMAX",
+  "source": "glossary"
+ },
+ "pokemon|耿鬼ex": {
+  "date": "2026-10-28",
+  "en": "Gengar ex",
+  "source": "glossary"
+ },
+ "pokemon|聒噪鸟": {
+  "date": "2026-10-28",
+  "en": "Chatot",
+  "source": "glossary"
+ },
+ "pokemon|肯泰罗": {
+  "date": "2026-10-28",
+  "en": "Tauros",
+  "source": "glossary"
+ },
+ "pokemon|胖可丁ex": {
+  "date": "2026-10-28",
+  "en": "Wigglytuff ex",
+  "source": "glossary"
+ },
+ "pokemon|胡地V": {
+  "date": "2026-10-28",
+  "en": "Alakazam V",
+  "source": "glossary"
+ },
+ "pokemon|胡地ex": {
+  "date": "2026-10-28",
+  "en": "Alakazam ex",
+  "source": "glossary"
+ },
+ "pokemon|胡帕V": {
+  "date": "2026-10-28",
+  "en": "Hoopa V",
+  "source": "glossary"
+ },
+ "pokemon|胡帕ex": {
+  "date": "2026-10-28",
+  "en": "Hoopa ex",
+  "source": "glossary"
+ },
+ "pokemon|自爆磁怪V": {
+  "date": "2026-10-28",
+  "en": "Magnezone V",
+  "source": "glossary"
+ },
+ "pokemon|自爆磁怪VSTAR": {
+  "date": "2026-10-28",
+  "en": "Magnezone VSTAR",
+  "source": "glossary"
+ },
+ "pokemon|自爆磁怪ex": {
+  "date": "2026-10-28",
+  "en": "Magnezone ex",
+  "source": "glossary"
+ },
+ "pokemon|臭泥": {
+  "date": "2026-10-28",
+  "en": "Grimer",
+  "source": "glossary"
+ },
+ "pokemon|艾路雷朵V": {
+  "date": "2026-10-28",
+  "en": "Gallade V",
+  "source": "glossary"
+ },
+ "pokemon|苍炎刃鬼": {
+  "date": "2026-10-28",
+  "en": "Ceruledge",
+  "source": "glossary"
+ },
+ "pokemon|莉佳的胖丁": {
+  "date": "2026-10-28",
+  "en": "Erika's Jigglypuff",
+  "source": "glossary"
+ },
+ "pokemon|莉莉艾的皮皮ex": {
+  "date": "2026-10-28",
+  "en": "Lillie's Clefairy ex",
+  "source": "glossary"
+ },
+ "pokemon|菊草叶": {
+  "date": "2026-10-28",
+  "en": "Chikorita",
+  "source": "glossary"
+ },
+ "pokemon|蒂蕾喵": {
+  "date": "2026-10-28",
+  "en": "Floragato",
+  "source": "glossary"
+ },
+ "pokemon|藤藤蛇": {
+  "date": "2026-10-28",
+  "en": "Snivy",
+  "source": "glossary"
+ },
+ "pokemon|蜂女王ex": {
+  "date": "2026-10-28",
+  "en": "Vespiquen ex",
+  "source": "glossary"
+ },
+ "pokemon|蜜集大蛇ex": {
+  "date": "2026-10-28",
+  "en": "Hydrapple ex",
+  "source": "glossary"
+ },
+ "pokemon|象牙猪ex": {
+  "date": "2026-10-28",
+  "en": "Mamoswine ex",
+  "source": "glossary"
+ },
+ "pokemon|豪力": {
+  "date": "2026-10-28",
+  "en": "Machoke",
+  "source": "glossary"
+ },
+ "pokemon|赛富豪ex": {
+  "date": "2026-10-28",
+  "en": "Gholdengo ex",
+  "source": "glossary"
+ },
+ "pokemon|赫普的苍响ex": {
+  "date": "2026-10-28",
+  "en": "Hop's Zacian ex",
+  "source": "glossary"
+ },
+ "pokemon|超梦": {
+  "date": "2026-10-28",
+  "en": "Mewtwo",
+  "source": "glossary"
+ },
+ "pokemon|超甲狂犀V": {
+  "date": "2026-10-28",
+  "en": "Rhyperior V",
+  "source": "glossary"
+ },
+ "pokemon|迷唇姐ex": {
+  "date": "2026-10-28",
+  "en": "Jynx ex",
+  "source": "glossary"
+ },
+ "pokemon|酋雷姆V": {
+  "date": "2026-10-28",
+  "en": "Kyurem V",
+  "source": "glossary"
+ },
+ "pokemon|酋雷姆VMAX": {
+  "date": "2026-10-28",
+  "en": "Kyurem VMAX",
+  "source": "glossary"
+ },
+ "pokemon|酷豹V": {
+  "date": "2026-10-28",
+  "en": "Liepard V",
+  "source": "glossary"
+ },
+ "pokemon|钻角犀兽": {
+  "date": "2026-10-28",
+  "en": "Rhydon",
+  "source": "glossary"
+ },
+ "pokemon|闪电鸟": {
+  "date": "2026-10-28",
+  "en": "Zapdos",
+  "source": "glossary"
+ },
+ "pokemon|闪耀时拉比": {
+  "date": "2026-10-28",
+  "en": "Shining Celebi",
+  "source": "glossary"
+ },
+ "pokemon|阿响的凤王ex": {
+  "date": "2026-10-28",
+  "en": "Ethan's Ho-Oh ex",
+  "source": "glossary"
+ },
+ "pokemon|阿柏怪ex": {
+  "date": "2026-10-28",
+  "en": "Arbok ex",
+  "source": "glossary"
+ },
+ "pokemon|阿罗拉 喵喵": {
+  "date": "2026-10-28",
+  "en": "Alolan Meowth",
+  "source": "glossary"
+ },
+ "pokemon|阿罗拉 地鼠": {
+  "date": "2026-10-28",
+  "en": "Alolan Diglett",
+  "source": "glossary"
+ },
+ "pokemon|阿罗拉 小拉达": {
+  "date": "2026-10-28",
+  "en": "Alolan Rattata",
+  "source": "glossary"
+ },
+ "pokemon|阿罗拉 拉达": {
+  "date": "2026-10-28",
+  "en": "Alolan Raticate",
+  "source": "glossary"
+ },
+ "pokemon|阿罗拉 椰蛋树": {
+  "date": "2026-10-28",
+  "en": "Alolan Exeggutor",
+  "source": "glossary"
+ },
+ "pokemon|阿罗拉 隆隆石": {
+  "date": "2026-10-28",
+  "en": "Alolan Graveler",
+  "source": "glossary"
+ },
+ "pokemon|隆隆岩ex": {
+  "date": "2026-10-28",
+  "en": "Golem ex",
+  "source": "glossary"
+ },
+ "pokemon|雪吞虫": {
+  "date": "2026-10-28",
+  "en": "Snom",
+  "source": "glossary"
+ },
+ "pokemon|雪妖女ex": {
+  "date": "2026-10-28",
+  "en": "Froslass ex",
+  "source": "glossary"
+ },
+ "pokemon|雷丘GX": {
+  "date": "2026-10-28",
+  "en": "Raichu GX",
+  "source": "glossary"
+ },
+ "pokemon|雷丘V": {
+  "date": "2026-10-28",
+  "en": "Raichu V",
+  "source": "glossary"
+ },
+ "pokemon|雷伊布GX": {
+  "date": "2026-10-28",
+  "en": "Jolteon GX",
+  "source": "glossary"
+ },
+ "pokemon|雷伊布V": {
+  "date": "2026-10-28",
+  "en": "Jolteon V",
+  "source": "glossary"
+ },
+ "pokemon|雷伊布VMAX": {
+  "date": "2026-10-28",
+  "en": "Jolteon VMAX",
+  "source": "glossary"
+ },
+ "pokemon|雷伊布ex": {
+  "date": "2026-10-28",
+  "en": "Jolteon ex",
+  "source": "glossary"
+ },
+ "pokemon|雷公V": {
+  "date": "2026-10-28",
+  "en": "Raikou V",
+  "source": "glossary"
+ },
+ "pokemon|雷吉奇卡斯V": {
+  "date": "2026-10-28",
+  "en": "Regigigas V",
+  "source": "glossary"
+ },
+ "pokemon|雷吉奇卡斯VSTAR": {
+  "date": "2026-10-28",
+  "en": "Regigigas VSTAR",
+  "source": "glossary"
+ },
+ "pokemon|雷吉洛克V": {
+  "date": "2026-10-28",
+  "en": "Regirock V",
+  "source": "glossary"
+ },
+ "pokemon|雷吉洛克ex": {
+  "date": "2026-10-28",
+  "en": "Regirock ex",
+  "source": "glossary"
+ },
+ "pokemon|雷吉艾勒奇V": {
+  "date": "2026-10-28",
+  "en": "Regieleki V",
+  "source": "glossary"
+ },
+ "pokemon|雷吉艾勒奇VMAX": {
+  "date": "2026-10-28",
+  "en": "Regieleki VMAX",
+  "source": "glossary"
+ },
+ "pokemon|霜奶仙ex": {
+  "date": "2026-10-28",
+  "en": "Alcremie ex",
+  "source": "glossary"
+ },
+ "pokemon|露奈雅拉GX": {
+  "date": "2026-10-28",
+  "en": "Lunala GX",
+  "source": "glossary"
+ },
+ "pokemon|霸王花GX": {
+  "date": "2026-10-28",
+  "en": "Vileplume GX",
+  "source": "glossary"
+ },
+ "pokemon|音箱蟀V": {
+  "date": "2026-10-28",
+  "en": "Kricketune V",
+  "source": "glossary"
+ },
+ "pokemon|顽皮雷弹": {
+  "date": "2026-10-28",
+  "en": "Electrode",
+  "source": "glossary"
+ },
+ "pokemon|鬃岩狼人GX": {
+  "date": "2026-10-28",
+  "en": "Lycanroc GX",
+  "source": "glossary"
+ },
+ "pokemon|鬃岩狼人V": {
+  "date": "2026-10-28",
+  "en": "Lycanroc V",
+  "source": "glossary"
+ },
+ "pokemon|鬃岩狼人VMAX": {
+  "date": "2026-10-28",
+  "en": "Lycanroc VMAX",
+  "source": "glossary"
+ },
+ "pokemon|鬃岩狼人ex": {
+  "date": "2026-10-28",
+  "en": "Lycanroc ex",
+  "source": "glossary"
+ },
+ "pokemon|魔幻假面喵ex": {
+  "date": "2026-10-28",
+  "en": "Meowscarada ex",
+  "source": "glossary"
+ },
+ "pokemon|麻花犬ex": {
+  "date": "2026-10-28",
+  "en": "Dachsbun ex",
+  "source": "glossary"
+ },
+ "trainer|N": {
+  "date": "2026-10-28",
+  "en": "N",
+  "source": "glossary"
+ },
+ "trainer|N的城堡": {
+  "date": "2026-10-28",
+  "en": "N's Castle",
+  "source": "glossary"
+ },
+ "trainer|不公印章": {
+  "date": "2026-10-28",
+  "en": "Unfair Stamp",
+  "source": "glossary"
+ },
+ "trainer|中立中心": {
+  "date": "2026-10-28",
+  "en": "Neutralization Zone",
+  "source": "glossary"
+ },
+ "trainer|丹帝": {
+  "date": "2026-10-28",
+  "en": "Leon",
+  "source": "glossary"
+ },
+ "trainer|丹瑜": {
+  "date": "2026-10-28",
+  "en": "Carmine",
+  "source": "glossary"
+ },
+ "trainer|也慈": {
+  "date": "2026-10-28",
+  "en": "Geeta",
+  "source": "glossary"
+ },
+ "trainer|仙后": {
+  "date": "2026-10-28",
+  "en": "Cassiopeia",
+  "source": "glossary"
+ },
+ "trainer|健行鞋": {
+  "date": "2026-10-28",
+  "en": "Trekking Shoes",
+  "source": "glossary"
+ },
+ "trainer|元素徽章": {
+  "date": "2026-10-28",
+  "en": "Elemental Badge",
+  "source": "glossary"
+ },
+ "trainer|克拉拉": {
+  "date": "2026-10-28",
+  "en": "Klara",
+  "source": "glossary"
+ },
+ "trainer|全罩防守": {
+  "date": "2026-10-28",
+  "en": "Full Face Guard",
+  "source": "glossary"
+ },
+ "trainer|凰檗": {
+  "date": "2026-10-28",
+  "en": "Dendra",
+  "source": "glossary"
+ },
+ "trainer|刺耳果": {
+  "date": "2026-10-28",
+  "en": "Colbur Berry",
+  "source": "glossary"
+ },
+ "trainer|力之沙漏": {
+  "date": "2026-10-28",
+  "en": "Powerglass",
+  "source": "glossary"
+ },
+ "trainer|千里": {
+  "date": "2026-10-28",
+  "en": "Norman",
+  "source": "glossary"
+ },
+ "trainer|千金小姐": {
+  "date": "2026-10-28",
+  "en": "Lady",
+  "source": "glossary"
+ },
+ "trainer|千香果": {
+  "date": "2026-10-28",
+  "en": "Passho Berry",
+  "source": "glossary"
+ },
+ "trainer|博士的研究": {
+  "date": "2026-10-28",
+  "en": "Professor's Research",
+  "source": "glossary"
+ },
+ "trainer|可怕的哥哥": {
+  "date": "2026-10-28",
+  "en": "Ruffian",
+  "source": "glossary"
+ },
+ "trainer|四尖石": {
+  "date": "2026-10-28",
+  "en": "Quad Stone",
+  "source": "glossary"
+ },
+ "trainer|大地封印石": {
+  "date": "2026-10-28",
+  "en": "Earthen Seal Stone",
+  "source": "glossary"
+ },
+ "trainer|天空封印石": {
+  "date": "2026-10-28",
+  "en": "Sky Seal Stone",
+  "source": "glossary"
+ },
+ "trainer|太晶珠": {
+  "date": "2026-10-28",
+  "en": "Tera Orb",
+  "source": "glossary"
+ },
+ "trainer|妮莫": {
+  "date": "2026-10-28",
+  "en": "Nemona",
+  "source": "glossary"
+ },
+ "trainer|妮莫的背包": {
+  "date": "2026-10-28",
+  "en": "Nemona's Backpack",
+  "source": "glossary"
+ },
+ "trainer|寇沙": {
+  "date": "2026-10-28",
+  "en": "Brassius",
+  "source": "glossary"
+ },
+ "trainer|小菘": {
+  "date": "2026-10-28",
+  "en": "Candice",
+  "source": "glossary"
+ },
+ "trainer|小霞": {
+  "date": "2026-10-28",
+  "en": "Misty",
+  "source": "glossary"
+ },
+ "trainer|岩石胸甲": {
+  "date": "2026-10-28",
+  "en": "Rock Chestplate",
+  "source": "glossary"
+ },
+ "trainer|巢穴球": {
+  "date": "2026-10-28",
+  "en": "Nest Ball",
+  "source": "glossary"
+ },
+ "trainer|工人": {
+  "date": "2026-10-28",
+  "en": "Worker",
+  "source": "glossary"
+ },
+ "trainer|巧可果": {
+  "date": "2026-10-28",
+  "en": "Occa Berry",
+  "source": "glossary"
+ },
+ "trainer|希巴": {
+  "date": "2026-10-28",
+  "en": "Bruno",
+  "source": "glossary"
+ },
+ "trainer|彩豆": {
+  "date": "2026-10-28",
+  "en": "Bea",
+  "source": "glossary"
+ },
+ "trainer|彼特": {
+  "date": "2026-10-28",
+  "en": "Bede",
+  "source": "glossary"
+ },
+ "trainer|志米": {
+  "date": "2026-10-28",
+  "en": "Siebold",
+  "source": "glossary"
+ },
+ "trainer|恐慌面具": {
+  "date": "2026-10-28",
+  "en": "Panic Mask",
+  "source": "glossary"
+ },
+ "trainer|悟松": {
+  "date": "2026-10-28",
+  "en": "Lucian",
+  "source": "glossary"
+ },
+ "trainer|挖洞手套": {
+  "date": "2026-10-28",
+  "en": "Digging Gloves",
+  "source": "glossary"
+ },
+ "trainer|捩木": {
+  "date": "2026-10-28",
+  "en": "Thorton",
+  "source": "glossary"
+ },
+ "trainer|掉包杯": {
+  "date": "2026-10-28",
+  "en": "Switching Cups",
+  "source": "glossary"
+ },
+ "trainer|放逐市": {
+  "date": "2026-10-28",
+  "en": "Lost City",
+  "source": "glossary"
+ },
+ "trainer|救援行李箱": {
+  "date": "2026-10-28",
+  "en": "Rescue Carrier",
+  "source": "glossary"
+ },
+ "trainer|星月": {
+  "date": "2026-10-28",
+  "en": "Cyllene",
+  "source": "glossary"
+ },
+ "trainer|朵拉塞娜": {
+  "date": "2026-10-28",
+  "en": "Drasna",
+  "source": "glossary"
+ },
+ "trainer|杜娟": {
+  "date": "2026-10-28",
+  "en": "Roxanne",
+  "source": "glossary"
+ },
+ "trainer|杜若": {
+  "date": "2026-10-28",
+  "en": "Drayton",
+  "source": "glossary"
+ },
+ "trainer|枇琶": {
+  "date": "2026-10-28",
+  "en": "Eri",
+  "source": "glossary"
+ },
+ "trainer|查克洛": {
+  "date": "2026-10-28",
+  "en": "Grant",
+  "source": "glossary"
+ },
+ "trainer|桌台市": {
+  "date": "2026-10-28",
+  "en": "Mesagoza",
+  "source": "glossary"
+ },
+ "trainer|梅洛可": {
+  "date": "2026-10-28",
+  "en": "Mela",
+  "source": "glossary"
+ },
+ "trainer|梨花的信念": {
+  "date": "2026-10-28",
+  "en": "Karen's Conviction",
+  "source": "glossary"
+ },
+ "trainer|森林封印石": {
+  "date": "2026-10-28",
+  "en": "Forest Seal Stone",
+  "source": "glossary"
+ },
+ "trainer|模仿少女": {
+  "date": "2026-10-28",
+  "en": "Copycat",
+  "source": "glossary"
+ },
+ "trainer|水之塔": {
+  "date": "2026-10-28",
+  "en": "Tower of Waters",
+  "source": "glossary"
+ },
+ "trainer|沉重接力棒": {
+  "date": "2026-10-28",
+  "en": "Heavy Baton",
+  "source": "glossary"
+ },
+ "trainer|波琵": {
+  "date": "2026-10-28",
+  "en": "Poppy",
+  "source": "glossary"
+ },
+ "trainer|泰姆": {
+  "date": "2026-10-28",
+  "en": "Tyme",
+  "source": "glossary"
+ },
+ "trainer|洗翠的沉重球": {
+  "date": "2026-10-28",
+  "en": "Hisuian Heavy Ball",
+  "source": "glossary"
+ },
+ "trainer|派帕": {
+  "date": "2026-10-28",
+  "en": "Arven",
+  "source": "glossary"
+ },
+ "trainer|派帕的三明治": {
+  "date": "2026-10-28",
+  "en": "Arven's Sandwich",
+  "source": "glossary"
+ },
+ "trainer|海岱": {
+  "date": "2026-10-28",
+  "en": "Kofu",
+  "source": "glossary"
+ },
+ "trainer|火夏": {
+  "date": "2026-10-28",
+  "en": "Arezu",
+  "source": "glossary"
+ },
+ "trainer|牡丹": {
+  "date": "2026-10-28",
+  "en": "Penny",
+  "source": "glossary"
+ },
+ "trainer|玩具捕捉器": {
+  "date": "2026-10-28",
+  "en": "Toy Catcher",
+  "source": "glossary"
+ },
+ "trainer|玻璃喇叭": {
+  "date": "2026-10-28",
+  "en": "Glass Trumpet",
+  "source": "glossary"
+ },
+ "trainer|瓢太": {
+  "date": "2026-10-28",
+  "en": "Roark",
+  "source": "glossary"
+ },
+ "trainer|甜甜蜜": {
+  "date": "2026-10-28",
+  "en": "Sweet Honey",
+  "source": "glossary"
+ },
+ "trainer|甜蜜球": {
+  "date": "2026-10-28",
+  "en": "Love Ball",
+  "source": "glossary"
+ },
+ "trainer|白蕾雅": {
+  "date": "2026-10-28",
+  "en": "Briar",
+  "source": "glossary"
+ },
+ "trainer|白露的真心": {
+  "date": "2026-10-28",
+  "en": "Bianca's Devotion",
+  "source": "glossary"
+ },
+ "trainer|皮拿": {
+  "date": "2026-10-28",
+  "en": "Giacomo",
+  "source": "glossary"
+ },
+ "trainer|睿智湖": {
+  "date": "2026-10-28",
+  "en": "Lake Acuity",
+  "source": "glossary"
+ },
+ "trainer|神代": {
+  "date": "2026-10-28",
+  "en": "Brandon",
+  "source": "glossary"
+ },
+ "trainer|神奇糖果": {
+  "date": "2026-10-28",
+  "en": "Rare Candy",
+  "source": "glossary"
+ },
+ "trainer|秋明": {
+  "date": "2026-10-28",
+  "en": "Atticus",
+  "source": "glossary"
+ },
+ "trainer|稀有化石": {
+  "date": "2026-10-28",
+  "en": "Rare Fossil",
+  "source": "glossary"
+ },
+ "trainer|空拍洛托姆": {
+  "date": "2026-10-28",
+  "en": "Drone Rotom",
+  "source": "glossary"
+ },
+ "trainer|米可利": {
+  "date": "2026-10-28",
+  "en": "Wallace",
+  "source": "glossary"
+ },
+ "trainer|米莫莎": {
+  "date": "2026-10-28",
+  "en": "Miriam",
+  "source": "glossary"
+ },
+ "trainer|紫竽": {
+  "date": "2026-10-28",
+  "en": "Lacey",
+  "source": "glossary"
+ },
+ "trainer|美蓉": {
+  "date": "2026-10-28",
+  "en": "Melony",
+  "source": "glossary"
+ },
+ "trainer|老大的指令": {
+  "date": "2026-10-28",
+  "en": "Boss's Orders",
+  "source": "glossary"
+ },
+ "trainer|能量回收": {
+  "date": "2026-10-28",
+  "en": "Energy Retrieval",
+  "source": "glossary"
+ },
+ "trainer|腐朽的盾": {
+  "date": "2026-10-28",
+  "en": "Rusted Shield",
+  "source": "glossary"
+ },
+ "trainer|舞者": {
+  "date": "2026-10-28",
+  "en": "Dancer",
+  "source": "glossary"
+ },
+ "trainer|芙蓉": {
+  "date": "2026-10-28",
+  "en": "Phoebe",
+  "source": "glossary"
+ },
+ "trainer|花月": {
+  "date": "2026-10-28",
+  "en": "Sidney",
+  "source": "glossary"
+ },
+ "trainer|芽米": {
+  "date": "2026-10-28",
+  "en": "Cheryl",
+  "source": "glossary"
+ },
+ "trainer|英雄斗篷": {
+  "date": "2026-10-28",
+  "en": "Hero's Cape",
+  "source": "glossary"
+ },
+ "trainer|莉普": {
+  "date": "2026-10-28",
+  "en": "Tulip",
+  "source": "glossary"
+ },
+ "trainer|莉莉艾的珍珠": {
+  "date": "2026-10-28",
+  "en": "Lillie's Pearl",
+  "source": "glossary"
+ },
+ "trainer|莎娜": {
+  "date": "2026-10-28",
+  "en": "Shauna",
+  "source": "glossary"
+ },
+ "trainer|莎莉娜": {
+  "date": "2026-10-28",
+  "en": "Serena",
+  "source": "glossary"
+ },
+ "trainer|莓榴果": {
+  "date": "2026-10-28",
+  "en": "Haban Berry",
+  "source": "glossary"
+ },
+ "trainer|菊子": {
+  "date": "2026-10-28",
+  "en": "Agatha",
+  "source": "glossary"
+ },
+ "trainer|蕾荷": {
+  "date": "2026-10-28",
+  "en": "Raifort",
+  "source": "glossary"
+ },
+ "trainer|裁判": {
+  "date": "2026-10-28",
+  "en": "Judge",
+  "source": "glossary"
+ },
+ "trainer|赤松": {
+  "date": "2026-10-28",
+  "en": "Crispin",
+  "source": "glossary"
+ },
+ "trainer|赫普": {
+  "date": "2026-10-28",
+  "en": "Hop",
+  "source": "glossary"
+ },
+ "trainer|赫普的包包": {
+  "date": "2026-10-28",
+  "en": "Hop's Bag",
+  "source": "glossary"
+ },
+ "trainer|足量水桶": {
+  "date": "2026-10-28",
+  "en": "Capacious Bucket",
+  "source": "glossary"
+ },
+ "trainer|辛俐": {
+  "date": "2026-10-28",
+  "en": "Rika",
+  "source": "glossary"
+ },
+ "trainer|迷光森林": {
+  "date": "2026-10-28",
+  "en": "Glimwood Tangle",
+  "source": "glossary"
+ },
+ "trainer|道具拆除器": {
+  "date": "2026-10-28",
+  "en": "Tool Scrapper",
+  "source": "glossary"
+ },
+ "trainer|野餐女孩": {
+  "date": "2026-10-28",
+  "en": "Picnicker",
+  "source": "glossary"
+ },
+ "trainer|防火手套": {
+  "date": "2026-10-28",
+  "en": "Fire-Resistant Gloves",
+  "source": "glossary"
+ },
+ "trainer|阿杏的秘招": {
+  "date": "2026-10-28",
+  "en": "Janine's Secret Art",
+  "source": "glossary"
+ },
+ "trainer|阿渡": {
+  "date": "2026-10-28",
+  "en": "Lance",
+  "source": "glossary"
+ },
+ "trainer|阿球": {
+  "date": "2026-10-28",
+  "en": "Ball Guy",
+  "source": "glossary"
+ },
+ "trainer|阿芒": {
+  "date": "2026-10-28",
+  "en": "Iscan",
+  "source": "glossary"
+ },
+ "trainer|阿蜜的目光": {
+  "date": "2026-10-28",
+  "en": "Jasmine's Gaze",
+  "source": "glossary"
+ },
+ "trainer|阿速": {
+  "date": "2026-10-28",
+  "en": "Falkner",
+  "source": "glossary"
+ },
+ "trainer|除草手套": {
+  "date": "2026-10-28",
+  "en": "Weeding Gloves",
+  "source": "glossary"
+ },
+ "trainer|零之大空洞": {
+  "date": "2026-10-28",
+  "en": "Area Zero Underdepths",
+  "source": "glossary"
+ },
+ "trainer|露璃娜": {
+  "date": "2026-10-28",
+  "en": "Nessa",
+  "source": "glossary"
+ },
+ "trainer|霹霹果": {
+  "date": "2026-10-28",
+  "en": "Babiri Berry",
+  "source": "glossary"
+ },
+ "trainer|青木": {
+  "date": "2026-10-28",
+  "en": "Larry",
+  "source": "glossary"
+ },
+ "trainer|香氛姐姐": {
+  "date": "2026-10-28",
+  "en": "Aroma Lady",
+  "source": "glossary"
+ },
+ "trainer|鬼之假面": {
+  "date": "2026-10-28",
+  "en": "Ogre's Mask",
+  "source": "glossary"
+ },
+ "trainer|黑暗球": {
+  "date": "2026-10-28",
+  "en": "Dusk Ball",
+  "source": "glossary"
+ }
+}

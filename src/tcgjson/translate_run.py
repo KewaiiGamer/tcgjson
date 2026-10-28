@@ -219,10 +219,22 @@ def translate_language(root: Path, code: str, translations_dir: Path, *,
                        batch_size: int = 20, today: str | None = None,
                        log: Callable[[str], None] = lambda _m: None) -> dict:
     lang = LANGUAGE_BY_CODE[code]
-    today = today or dt.date.today().isoformat()
     translations = Translations.load(translations_dir, code)
     items, glossary = pending_items(root, code, translations, japan_catalog=japan_catalog,
                                     tcgdex_snapshot=tcgdex_snapshot)
+    return fill_cache(code, lang.label, items, glossary, translations, translations_dir,
+                      translator=translator, limit=limit, batch_size=batch_size, today=today,
+                      log=log)
+
+
+def fill_cache(code: str, label: str, items: list[dict], glossary: dict[str, str],
+               translations: Translations, translations_dir: Path, *,
+               translator: Translator | None, limit: int | None = None, batch_size: int = 20,
+               today: str | None = None, log: Callable[[str], None] = lambda _m: None) -> dict:
+    """Cache glossary hits, then machine-translate the rest (never a cached key)."""
+    today = today or dt.date.today().isoformat()
+    items = [item for item in items if item["key"] not in translations.cache
+             and not translations.is_overridden(item["kind"], item["name"])]
     counts = {"glossary": 0, "machine": 0, "pending": 0, "error": None}
     remaining = []
     for item in items:
@@ -251,7 +263,7 @@ def translate_language(root: Path, code: str, translations_dir: Path, *,
                 entry["candidates"] = candidates
             payload.append(entry)
         try:
-            answers = translator.translate(lang.label, payload)
+            answers = translator.translate(label, payload)
         except (OSError, ValueError, KeyError, IndexError, TypeError,
                 requests.RequestException) as exc:
             counts["error"] = str(exc)
@@ -278,6 +290,19 @@ def run_translate(args) -> int:
               "the rest stays native (route 4)")
     codes = args.languages or [code for code in LANGUAGE_BY_CODE]
     for code in codes:
+        if code == "zh-cn":
+            from .chs_import import translate_chs
+
+            if not args.chs_json:
+                print("zh-cn: --chs-json is required")
+                return 2
+            result = translate_chs(args.chs_json, args.ptcg_root, args.translations,
+                                   translator=translator, japan_catalog=args.japan_catalog,
+                                   limit=args.limit, batch_size=args.batch_size, log=print)
+            print(f"{code}: glossary {result['glossary']}, machine {result['machine']}, "
+                  f"pending {result['pending']}" + (f", stopped: {result['error']}"
+                                                     if result["error"] else ""))
+            continue
         result = translate_language(
             args.ptcg_root, code, args.translations, translator=translator,
             japan_catalog=args.japan_catalog, tcgdex_snapshot=args.tcgdex_snapshot,

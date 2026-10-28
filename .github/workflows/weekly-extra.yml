@@ -22,10 +22,12 @@ jobs:
       # is neither built nor carried forward.
       PTCG_LANGUAGES: zh-tw,de,fr,es,it,pt
       # The converter assets this workflow publishes (built, or carried forward from the previous
-      # release when the converter wrote none).
+      # release when the converter wrote none), plus the pinned copy of the Simplified Chinese
+      # dataset JSON (ptcg-chs-infos.json.gz) that keeps the build alive if the source vanishes.
       LANGUAGE_ASSETS: >-
         pokemon-chinese-traditional.json.gz pokemon-german.json.gz pokemon-french.json.gz
         pokemon-spanish.json.gz pokemon-italian.json.gz pokemon-portuguese.json.gz
+        pokemon-chinese-simplified.json.gz ptcg-chs-infos.json.gz
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,7 +51,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          notes="Pokemon Japan (TCGplayer product line 85), built by tcgjson. Other languages converted from PTCG-database (https://github.com/type-null/PTCG-database, MIT License, Copyright (c) 2025 Weihang Ren) at commit $(sed -n 's/^commit=//p' ptcg-database.lock)."
+          notes="Pokemon Japan (TCGplayer product line 85), built by tcgjson. Other languages converted from PTCG-database (https://github.com/type-null/PTCG-database, MIT License, Copyright (c) 2025 Weihang Ren) at commit $(sed -n 's/^commit=//p' ptcg-database.lock). Simplified Chinese converted from PTCG-CHS-Datasets (https://github.com/KewaiiGamer/PTCG-CHS-Datasets) at commit $(sed -n 's/^commit=//p' chs-dataset.lock)."
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Extra catalogs $TAG" --notes "$notes"
           gh release upload "$TAG" release/pokemon-japan.json.gz --clobber
       - name: Download the previous release's language files (gates and name pins)
@@ -91,7 +93,24 @@ jobs:
             echo "gates=failed" >> "$GITHUB_OUTPUT"
             echo "::error::A PTCG language failed a hard gate or the converter failed; the previous file is republished for it"
           fi
-      - name: Publish release (PTCG-database languages)
+      - name: Convert Simplified Chinese (PTCG-CHS-Datasets, pinned in chs-dataset.lock)
+        id: chs
+        if: ${{ !cancelled() && steps.japan.outcome == 'success' }}
+        run: |
+          set -uo pipefail
+          ok=1
+          if bash scripts/fetch_chs_dataset.sh chs.json previous/ptcg-chs-infos.json.gz; then
+            gzip -9c chs.json > release/ptcg-chs-infos.json.gz
+            commit="$(sed -n 's/^commit=//p' chs-dataset.lock)"
+            tcgjson import-chs --chs-json chs.json --ptcg-root ptcg-database --output release               --translations translations --previous-dir previous --carry-forward               --source-commit "$commit" | tee -a "$GITHUB_STEP_SUMMARY" || ok=0
+          else
+            ok=0
+          fi
+          if [ "$ok" = 1 ]; then echo "gates=ok" >> "$GITHUB_OUTPUT"; else
+            echo "gates=failed" >> "$GITHUB_OUTPUT"
+            echo "::error::Simplified Chinese failed (dataset fetch, gate or converter); the previous file is republished"
+          fi
+      - name: Publish release (converted languages)
         # Runs even when the fetch or the converter failed, so the previous files are carried
         # forward and the next build keeps its baseline.
         if: ${{ !cancelled() && steps.japan.outcome == 'success' }}
@@ -110,5 +129,5 @@ jobs:
           done
           if [ "${#files[@]}" -gt 0 ]; then gh release upload "$TAG" "${files[@]}" --clobber; fi
       - name: Fail when a language gate failed
-        if: ${{ !cancelled() && steps.ptcg.outputs.gates == 'failed' }}
+        if: ${{ !cancelled() && (steps.ptcg.outputs.gates == 'failed' || steps.chs.outputs.gates == 'failed') }}
         run: exit 1
