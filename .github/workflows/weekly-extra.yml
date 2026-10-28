@@ -45,6 +45,16 @@ jobs:
         run: >-
           python -c "import gzip,json;d=json.load(gzip.open('release/pokemon-japan.json.gz'));
           assert len(d['sets'])>50 and len(d['products'])>5000, (len(d['sets']),len(d['products']))"
+      - name: Fetch PTCG-database (sparse, pinned in ptcg-database.lock)
+        id: ptcgfetch
+        run: bash scripts/fetch_ptcg_database.sh ptcg-database
+      - name: Add Japanese names
+        run: >-
+          python -m tcgjson.jp_native
+          --catalog release/pokemon-japan.json.gz
+          --ptcg-root ptcg-database
+          --report "$RUNNER_TEMP/jp-native-report.json"
+          --min-share 0.6
       - name: Publish release (Japan)
         id: japan
         env:
@@ -80,9 +90,6 @@ jobs:
             [ -n "$ok" ] || { echo "::error::downloading $asset from $prev_tag failed"; exit 1; }
             echo "$asset baseline: $prev_tag"
           done
-      - name: Fetch PTCG-database (sparse, pinned in ptcg-database.lock)
-        id: ptcgfetch
-        run: bash scripts/fetch_ptcg_database.sh ptcg-database
       - name: Convert PTCG-database languages
         id: ptcg
         run: |

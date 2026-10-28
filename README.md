@@ -172,3 +172,8 @@ on the GitHub Actions release flow, see [docs/building-yourself.md](docs/buildin
 This project is not produced by or endorsed by TCGplayer or any game publisher.
 TCGplayer and product-line names are trademarks of their respective owners.
 Catalog information should be treated as informational and may become stale.
+
+Japanese card names (`nameNative` in `pokemon-japan.json.gz`) come from
+[PTCG-database](https://github.com/type-null/PTCG-database) by type-null, MIT licence,
+at the commit pinned in `locks/ptcg-database.commit` (see `src/tcgjson/jp_native.py`);
+its licence text is in `licenses/PTCG-database-LICENSE.txt`.
