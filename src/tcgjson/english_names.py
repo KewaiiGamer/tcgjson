@@ -145,6 +145,7 @@ class JapanLinks:
         self.jp_by_print = jp_by_print
         self.names = names
         self.set_names = set_names
+        self.totals: dict[str, set[str]] = {}  # TCGplayer printed totals per code
         self._folded_codes = collections.defaultdict(set)
         for code, _number in names:
             self._folded_codes[code.casefold()].add(code)
@@ -159,6 +160,7 @@ class JapanLinks:
                 jp_by_print[card.print_key].append(card)
         names: dict[tuple[str, str], str | None] = {}
         set_names: dict[str, str | None] = {}
+        totals: dict[str, set[str]] = collections.defaultdict(set)
         if japan_catalog is not None and Path(japan_catalog).exists():
             with gzip.open(japan_catalog, "rt", encoding="utf-8") as fh:
                 data = json.load(fh)
@@ -174,11 +176,16 @@ class JapanLinks:
             grouped: dict[tuple[str, str], list[str]] = collections.defaultdict(list)
             for p in data.get("products") or []:
                 code = codes.get(p.get("setId"))
-                number = str(p.get("collectorNumber") or "").split("/")[0].strip()
+                number, _, total = str(p.get("collectorNumber") or "").partition("/")
+                number, total = number.strip(), total.strip()
                 if code and number and p.get("name"):
                     grouped[(code, norm_number(number))].append(p["name"])
+                if code and total.isdigit():
+                    totals[code].add(norm_number(total))
             names = {key: tcgplayer_base_name(group) for key, group in grouped.items()}
-        return cls(dict(jp_by_print), names, set_names)
+        links = cls(dict(jp_by_print), names, set_names)
+        links.totals = dict(totals)
+        return links
 
     def resolve_code(self, code: str) -> str | None:
         """The TCGplayer code for a PTCG code: exact, else a unique case-insensitive match."""
@@ -202,14 +209,43 @@ def _agrees(card: Card, jp_cards: list[Card]) -> bool:
     return any(j.dex == card.dex and j.hp == card.hp for j in jp_cards if j.dex)
 
 
-def trusted_sets(cards: Iterable[Card], japan: JapanLinks) -> dict[str, str]:
-    """``trusted`` / ``untrusted`` / ``unknown`` per set code (Pokedex number and HP agreement)."""
+def _print_code_number(print_key: str) -> tuple[str, str]:
+    code, _, number = print_key[len("asia:"):].rpartition("-")
+    return code, norm_number(number)
+
+
+def _printed_total(card: Card) -> str | None:
+    _num, sep, total = card.collector_number.partition("/")
+    return norm_number(total) if sep and total.isdigit() else None
+
+
+def trusted_sets(cards: Iterable[Card], japan: JapanLinks,
+                 species: dict[int, str] | None = None) -> dict[str, str]:
+    """``trusted`` / ``untrusted`` / ``unknown`` per set code.
+
+    Spec rule (PTCG side): at least 5 Pokemon cards with a Japanese card at the same number, and
+    at least 95% of them agree on Pokedex number and HP. Extra TCGplayer-side checks, because the
+    English name comes from TCGplayer's set with the same code, which can be another product
+    (TCGplayer's ``svAW`` is not PTCG's ``SVAW``): when the set's printed total and TCGplayer's
+    printed totals for that code are both known they must match, and at least 95% of the
+    Pokemon whose TCGplayer name is known must have their species in that name.
+    """
+    species = species or {}
     compared: collections.Counter[str] = collections.Counter()
     agreed: collections.Counter[str] = collections.Counter()
+    tp_compared: collections.Counter[str] = collections.Counter()
+    tp_agreed: collections.Counter[str] = collections.Counter()
+    totals: dict[str, collections.Counter[str]] = collections.defaultdict(collections.Counter)
+    print_codes: dict[str, collections.Counter[str]] = collections.defaultdict(collections.Counter)
     codes: set[str] = set()
     for card in cards:
         codes.add(card.set_code)
+        total = _printed_total(card)
+        if total:
+            totals[card.set_code][total] += 1
         key = _japan_key(card.print_key)
+        if key:
+            print_codes[card.set_code][_print_code_number(key)[0]] += 1
         if not card.dex or not key:
             continue
         jp_cards = [j for j in japan.jp_by_print.get(key, []) if j.dex]
@@ -217,15 +253,32 @@ def trusted_sets(cards: Iterable[Card], japan: JapanLinks) -> dict[str, str]:
             continue
         compared[card.set_code] += 1
         agreed[card.set_code] += _agrees(card, jp_cards)
+        name = japan.english_name(*_print_code_number(key))
+        if name and species.get(card.dex):
+            tp_compared[card.set_code] += 1
+            tp_agreed[card.set_code] += normalize_key(species[card.dex]) in normalize_key(name)
     trust: dict[str, str] = {}
     for code in sorted(codes):
         if compared[code] < TRUST_MIN_COMPARED:
             trust[code] = "unknown"
-        elif agreed[code] / compared[code] >= TRUST_MIN_SHARE:
-            trust[code] = "trusted"
-        else:
+        elif agreed[code] / compared[code] < TRUST_MIN_SHARE:
             trust[code] = "untrusted"
+        elif tp_compared[code] and tp_agreed[code] / tp_compared[code] < TRUST_MIN_SHARE:
+            trust[code] = "untrusted"
+        elif _totals_disagree(code, totals, print_codes, japan):
+            trust[code] = "untrusted"
+        else:
+            trust[code] = "trusted"
     return trust
+
+
+def _totals_disagree(code: str, totals: dict, print_codes: dict, japan: JapanLinks) -> bool:
+    if not totals.get(code) or not print_codes.get(code):
+        return False
+    ours = totals[code].most_common(1)[0][0]
+    resolved = japan.resolve_code(print_codes[code].most_common(1)[0][0])
+    theirs = japan.totals.get(resolved) if resolved else None
+    return bool(theirs) and ours not in theirs
 
 
 @dataclass(slots=True)
@@ -283,7 +336,7 @@ def link_ja(card: Card, ctx: NameContext, trust: dict[str, str]) -> str | None:
 
 
 def resolve_names(cards: list[Card], ctx: NameContext) -> list[Resolved]:
-    trust = trusted_sets(cards, ctx.japan) if ctx.japan is not None else {}
+    trust = trusted_sets(cards, ctx.japan, ctx.species) if ctx.japan is not None else {}
     out: list[Resolved] = []
     for card in cards:
         alias = ctx.species.get(card.dex) if card.dex else None
@@ -308,4 +361,4 @@ def resolve_names(cards: list[Card], ctx: NameContext) -> list[Resolved]:
 
 
 def set_trust(cards: list[Card], ctx: NameContext) -> dict[str, str]:
-    return trusted_sets(cards, ctx.japan) if ctx.japan is not None else {}
+    return trusted_sets(cards, ctx.japan, ctx.species) if ctx.japan is not None else {}

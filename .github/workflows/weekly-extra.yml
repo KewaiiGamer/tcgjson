@@ -17,6 +17,15 @@ jobs:
     if: github.repository == 'KewaiiGamer/tcgjson'
     runs-on: ubuntu-latest
     timeout-minutes: 340
+    env:
+      # Korean (ko) is paused pending the owner's decision on its linked_ja trainer links.
+      PTCG_LANGUAGES: zh-tw,de,fr,es,it,pt
+      # Every converter asset name: downloaded from the previous release and published (built,
+      # or carried forward when the converter wrote none).
+      LANGUAGE_ASSETS: >-
+        pokemon-korean.json.gz pokemon-chinese-traditional.json.gz pokemon-german.json.gz
+        pokemon-french.json.gz pokemon-spanish.json.gz pokemon-italian.json.gz
+        pokemon-portuguese.json.gz
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,43 +41,65 @@ jobs:
         run: >-
           python -c "import gzip,json;d=json.load(gzip.open('release/pokemon-japan.json.gz'));
           assert len(d['sets'])>50 and len(d['products'])>5000, (len(d['sets']),len(d['products']))"
-      - name: Fetch PTCG-database (sparse, pinned in ptcg-database.lock)
-        run: bash scripts/fetch_ptcg_database.sh ptcg-database
-      - name: Download the previous release's language files (gates)
+      - name: Download the previous release's language files (gates and name pins)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           mkdir -p previous
-          gh release download --repo "$GITHUB_REPOSITORY" --pattern 'pokemon-*.json.gz' --dir previous || echo "no previous release files"
-      - name: Update the TCGdex English snapshot (missing sets only, never fails)
-        run: tcgjson tcgdex-snapshot --ptcg-root ptcg-database --snapshot data/tcgdex-en.json || true
-      - name: Convert PTCG-database languages
-        id: ptcg
-        env:
-          # Korean (ko) is paused pending the owner's decision on its linked_ja trainer links.
-          PTCG_LANGUAGES: zh-tw,de,fr,es,it,pt
-        run: |
-          set -uo pipefail
-          commit="$(sed -n 's/^commit=//p' ptcg-database.lock)"
-          if tcgjson ptcg-build --ptcg-root ptcg-database --output release \
-              --languages "$PTCG_LANGUAGES" --japan-catalog release/pokemon-japan.json.gz \
-              --translations translations --tcgdex-snapshot data/tcgdex-en.json \
-              --previous-dir previous --source-commit "$commit" --report release/.ptcg-report.json \
-              | tee -a "$GITHUB_STEP_SUMMARY"; then
-            echo "gates=ok" >> "$GITHUB_OUTPUT"
-          else
-            echo "gates=failed" >> "$GITHUB_OUTPUT"
-            echo "::error::A PTCG language failed a hard gate or the converter failed; its file is not published"
-          fi
-      - name: Publish release
+          # The most recent extra-* release (never another workflow's release).
+          prev_tag="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 50 --json tagName \
+            --jq '[.[] | select(.tagName | startswith("extra-"))][0].tagName // ""')"
+          if [ -z "$prev_tag" ]; then echo "no previous extra release"; exit 0; fi
+          have="$(gh release view "$prev_tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
+          for asset in $LANGUAGE_ASSETS; do
+            if printf '%s\n' "$have" | grep -qx "$asset"; then
+              gh release download "$prev_tag" --repo "$GITHUB_REPOSITORY" --pattern "$asset" --dir previous
+            else
+              echo "previous release $prev_tag has no $asset"
+            fi
+          done
+      - name: Publish release (Japan)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           tag="extra-$(date -u +%Y%m%d)"
-          notes="Pokemon Japan (TCGplayer product line 85), built by tcgjson. Korean, Chinese (Traditional) and European languages converted from PTCG-database (https://github.com/type-null/PTCG-database, MIT License, Copyright (c) 2025 Weihang Ren) at commit $(sed -n 's/^commit=//p' ptcg-database.lock)."
+          notes="Pokemon Japan (TCGplayer product line 85), built by tcgjson. Other languages converted from PTCG-database (https://github.com/type-null/PTCG-database, MIT License, Copyright (c) 2025 Weihang Ren) at commit $(sed -n 's/^commit=//p' ptcg-database.lock)."
           gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "Extra catalogs $tag" --notes "$notes"
-          gh release upload "$tag" release/pokemon-*.json.gz --clobber
+          gh release upload "$tag" release/pokemon-japan.json.gz --clobber
+      - name: Fetch PTCG-database (sparse, pinned in ptcg-database.lock)
+        run: bash scripts/fetch_ptcg_database.sh ptcg-database
+      - name: Convert PTCG-database languages
+        id: ptcg
+        run: |
+          set -uo pipefail
+          commit="$(sed -n 's/^commit=//p' ptcg-database.lock)"
+          # Only the committed TCGdex snapshot is used, so linked names never flip between builds.
+          if tcgjson ptcg-build --ptcg-root ptcg-database --output release \
+              --languages "$PTCG_LANGUAGES" --japan-catalog release/pokemon-japan.json.gz \
+              --translations translations --tcgdex-snapshot data/tcgdex-en.json \
+              --previous-dir previous --carry-forward --source-commit "$commit" \
+              --report ptcg-report.json | tee -a "$GITHUB_STEP_SUMMARY"; then
+            echo "gates=ok" >> "$GITHUB_OUTPUT"
+          else
+            echo "gates=failed" >> "$GITHUB_OUTPUT"
+            echo "::error::A PTCG language failed a hard gate or the converter failed; the previous file is republished for it"
+          fi
+      - name: Publish release (PTCG-database languages)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="extra-$(date -u +%Y%m%d)"
+          files=()
+          for asset in $LANGUAGE_ASSETS; do
+            # A file the converter did not write (crash, paused language) is carried forward from
+            # the previous release, so the app and the next build's gates keep a baseline.
+            if [ -f "release/$asset" ]; then files+=("release/$asset");
+            elif [ -f "previous/$asset" ]; then files+=("previous/$asset"); fi
+          done
+          if [ "${#files[@]}" -gt 0 ]; then gh release upload "$tag" "${files[@]}" --clobber; fi
       - name: Fail when a language gate failed
         if: steps.ptcg.outputs.gates == 'failed'
         run: exit 1

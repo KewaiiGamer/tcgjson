@@ -12,6 +12,7 @@ import collections
 import datetime as dt
 import gzip
 import json
+import shutil
 import zlib
 from pathlib import Path
 from typing import Iterable
@@ -95,20 +96,25 @@ def unique_abbreviations(proposed: dict[str, str], previous: dict[str, str] | No
     """
     previous = previous or {}
     codes = set(proposed)
-    counts = collections.Counter(proposed.values())
     final: dict[str, str] = {}
+    # 1. Reserve last release's abbreviations first, so no other set can take them.
+    pinned = collections.Counter(old for code, old in previous.items() if code in codes)
     for code in sorted(proposed):
+        old = previous.get(code)
+        if old and pinned[old] == 1 and (old == code or old not in codes):
+            final[code] = old
+    reserved = set(final.values())
+    # 2. The rest: the official code when unique and free, else the set code.
+    counts = collections.Counter(proposed[c] for c in proposed if c not in final)
+    for code in sorted(proposed):
+        if code in final:
+            continue
         abbreviation = proposed[code]
-        if counts[abbreviation] == 1 and (abbreviation == code or abbreviation not in codes):
+        if (counts[abbreviation] == 1 and abbreviation not in reserved
+                and (abbreviation == code or abbreviation not in codes)):
             final[code] = abbreviation
         else:
             final[code] = code
-    for code, old in sorted(previous.items()):
-        if code not in final or final[code] == old:
-            continue
-        holders = [c for c, a in final.items() if a == old]
-        if not holders and (old == code or old not in codes):
-            final[code] = old
     if len(set(final.values())) != len(final):
         raise GateError("set abbreviations are not unique")
     return final
@@ -285,8 +291,27 @@ def _read_previous(previous_dir: Path | None, lang: Language) -> dict | None:
     path = Path(previous_dir) / lang.asset
     if not path.exists():
         return None
-    with gzip.open(path, "rt", encoding="utf-8") as fh:
-        return json.load(fh)
+    try:
+        with gzip.open(path, "rt", encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError, EOFError) as exc:
+        raise GateError(f"{lang.code}: previous release file {path.name} is unreadable: {exc}")
+    if not isinstance(data, dict):
+        raise GateError(f"{lang.code}: previous release file {path.name} is not a catalog")
+    return data
+
+
+def renamed_since(previous: dict | None, products: list[dict]) -> dict[str, int]:
+    """Rows whose name changed against the previous release, by their new nameSource."""
+    if not previous:
+        return {}
+    old = {p.get("sourceId"): p.get("name") for p in previous.get("products") or []}
+    counts: collections.Counter[str] = collections.Counter()
+    for product in products:
+        before = old.get(product["sourceId"])
+        if before is not None and before != product["name"]:
+            counts[product["nameSource"]] += 1
+    return dict(sorted(counts.items()))
 
 
 def _overridden(resolved: list[Resolved], translations: Translations) -> set[str]:
@@ -315,8 +340,14 @@ def build_context(root: Path, lang: Language, *, english: EnglishIndex, japan: J
 def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog: Path | None,
                     translations_dir: Path | None, tcgdex_snapshot: Path | None,
                     previous_dir: Path | None = None, source_commit: str = "",
-                    generated_at: str | None = None) -> dict[str, dict]:
-    """Write one catalog file per language. Returns ``{code: {coverage, file} | {error}}``."""
+                    generated_at: str | None = None,
+                    carry_forward: bool = False) -> dict[str, dict]:
+    """Write one catalog file per language. Returns ``{code: {coverage, file} | {error}}``.
+
+    With ``carry_forward``, a language that fails a gate gets the previous release's file copied
+    to the output unchanged, so the next release still holds it (and the next build's gates and
+    name pins still have a baseline).
+    """
     root = Path(root)
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
@@ -341,12 +372,12 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
     for lang in languages:
         stats: dict[str, int] = {}
         cards = load_language(root, lang.code, stats=stats)
-        previous = _read_previous(previous_dir, lang)
         ctx = build_context(root, lang, english=english, japan=japan, tcgdex=tcgdex,
                             translations_dir=translations_dir, species=species)
         resolved = resolve_names(cards, ctx)
         trust = set_trust(cards, ctx)
         try:
+            previous = _read_previous(previous_dir, lang)
             skipped = stats.get("skipped", 0)
             if skipped > MAX_SKIPPED_SHARE * max(1, skipped + len(cards)):
                 raise GateError(f"{lang.code}: {skipped} unreadable source files")
@@ -360,7 +391,12 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
             report[lang.code] = {"error": str(exc),
                                  "coverage": coverage_counts(
                                      [{"nameSource": r.source} for r in resolved])}
+            old_file = Path(previous_dir) / lang.asset if previous_dir is not None else None
+            if carry_forward and old_file is not None and old_file.exists():
+                shutil.copyfile(old_file, output / lang.asset)
+                report[lang.code]["carriedForward"] = True
             continue
+        renamed = renamed_since(previous, products)
         trust_counts = collections.Counter(trust.values())
         data = {
             "meta": {
@@ -376,6 +412,7 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
                            "license": "MIT"},
                 "coverage": {lang.code: counts},
                 "skippedSourceFiles": stats.get("skipped", 0),
+                "renamedSincePrevious": renamed,
                 "setTrust": {k: trust_counts.get(k, 0) for k in ("trusted", "untrusted", "unknown")},
             },
             "sets": sorted(sets.values(), key=lambda s: s["name"]),
@@ -387,5 +424,5 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
             json.dump(data, fh, ensure_ascii=False, separators=(",", ":"))
         tmp.replace(path)
         report[lang.code] = {"coverage": counts, "file": str(path),
-                             "skipped": stats.get("skipped", 0)}
+                             "skipped": stats.get("skipped", 0), "renamed": renamed}
     return report

@@ -3629,6 +3629,16 @@
   "en": "Brassius",
   "source": "glossary"
  },
+ "trainer|寶可夢交替": {
+  "date": "2026-10-28",
+  "en": "Switch",
+  "source": "glossary"
+ },
+ "trainer|寶可夢捕捉器": {
+  "date": "2026-10-28",
+  "en": "Pokemon Catcher",
+  "source": "glossary"
+ },
  "trainer|寶可夢旋風回收機": {
   "date": "2026-10-28",
   "en": "Scoop Up Cyclone",
@@ -3644,6 +3654,11 @@
   "en": "Poke Vital A",
   "source": "glossary"
  },
+ "trainer|寶可裝置3.0": {
+  "date": "2026-10-28",
+  "en": "Pokegear 3.0",
+  "source": "glossary"
+ },
  "trainer|寶可齒輪3.0": {
   "date": "2026-10-28",
   "en": "Pokegear 3.0",
@@ -3652,6 +3667,11 @@
  "trainer|小光": {
   "date": "2026-10-28",
   "en": "Dawn",
+  "source": "glossary"
+ },
+ "trainer|巢穴球": {
+  "date": "2026-10-28",
+  "en": "Nest Ball",
   "source": "glossary"
  },
  "trainer|巧可果": {
@@ -3879,6 +3899,11 @@
   "en": "Rose Tower",
   "source": "glossary"
  },
+ "trainer|活力頭帶": {
+  "date": "2026-10-28",
+  "en": "Vitality Band",
+  "source": "glossary"
+ },
  "trainer|派帕": {
   "date": "2026-10-28",
   "en": "Arven",
@@ -4054,6 +4079,11 @@
   "en": "Fennel",
   "source": "glossary"
  },
+ "trainer|短褲小子": {
+  "date": "2026-10-28",
+  "en": "Youngster",
+  "source": "glossary"
+ },
  "trainer|硬硬束帶": {
   "date": "2026-10-28",
   "en": "Rigid Band",
@@ -4107,6 +4137,11 @@
  "trainer|等級球": {
   "date": "2026-10-28",
   "en": "Level Ball",
+  "source": "glossary"
+ },
+ "trainer|粉碎之錘": {
+  "date": "2026-10-28",
+  "en": "Crushing Hammer",
   "source": "glossary"
  },
  "trainer|粗硬頭盔": {
@@ -4164,6 +4199,11 @@
   "en": "Piers",
   "source": "glossary"
  },
+ "trainer|能量回收": {
+  "date": "2026-10-28",
+  "en": "Energy Retrieval",
+  "source": "glossary"
+ },
  "trainer|能量回收器": {
   "date": "2026-10-28",
   "en": "Energy Recycler",
@@ -4182,6 +4222,11 @@
  "trainer|能量貼紙": {
   "date": "2026-10-28",
   "en": "Energy Sticker",
+  "source": "glossary"
+ },
+ "trainer|能量輸送": {
+  "date": "2026-10-28",
+  "en": "Energy Search",
   "source": "glossary"
  },
  "trainer|能量轉移": {
@@ -4257,6 +4302,11 @@
  "trainer|衝浪手": {
   "date": "2026-10-28",
   "en": "Surfer",
+  "source": "glossary"
+ },
+ "trainer|裁判": {
+  "date": "2026-10-28",
+  "en": "Judge",
   "source": "glossary"
  },
  "trainer|西餐廚師": {
@@ -4502,6 +4552,11 @@
  "trainer|高科技雷達": {
   "date": "2026-10-28",
   "en": "Techno Radar",
+  "source": "glossary"
+ },
+ "trainer|高級球": {
+  "date": "2026-10-28",
+  "en": "Ultra Ball",
   "source": "glossary"
  },
  "trainer|高級香氛": {

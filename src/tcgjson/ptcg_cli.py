@@ -34,6 +34,8 @@ def register_ptcg_commands(subparsers) -> None:
     build.add_argument("--previous-dir", type=Path, default=None,
                        help="Directory holding the previous release's language files (gates)")
     build.add_argument("--source-commit", default="")
+    build.add_argument("--carry-forward", action="store_true",
+                       help="Copy the previous release's file for a language that fails a gate")
     build.add_argument("--report", type=Path, default=None, help="Write the coverage report JSON")
 
     snap = subparsers.add_parser("tcgdex-snapshot", help="Fetch missing TCGdex English sets")
@@ -60,14 +62,17 @@ def run_ptcg_command(args) -> int:
             args.ptcg_root, args.output, args.languages or list(ALL_CODES),
             japan_catalog=args.japan_catalog, translations_dir=args.translations,
             tcgdex_snapshot=args.tcgdex_snapshot, previous_dir=args.previous_dir,
-            source_commit=args.source_commit,
+            source_commit=args.source_commit, carry_forward=args.carry_forward,
         )
         failed = False
         for code, entry in report.items():
             print(coverage_line(code, entry["coverage"]))
+            if entry.get("renamed"):
+                print(f"{code}: renamed since the previous release: {entry['renamed']}")
             if "error" in entry:
                 failed = True
-                print(f"GATE FAILED {entry['error']}")
+                carried = " (previous file carried forward)" if entry.get("carriedForward") else ""
+                print(f"GATE FAILED {entry['error']}{carried}")
         if args.report:
             args.report.write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8")
         return 1 if failed else 0

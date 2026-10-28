@@ -50,7 +50,7 @@ def test_tcgplayer_base_name_strips_numbers_and_variant_parentheses():
 
 def _tree(tmp_path):
     root = tmp_path / "ptcg"
-    write_species(root, {"pikachu": 25, "bulbasaur": 1, "charmander": 4})
+    write_species(root, {"pikachu": 25, "bulbasaur": 1})
     # English cards
     write_card(root, "en", "SV/SVI/1", name="Pikachu", number="1", card_type="Pokémon",
                print_key="en:SVI-1", card_key="25|60|1|A|10|1", pokedex_number=25)
@@ -93,8 +93,9 @@ def _tree(tmp_path):
         tmp_path / "pokemon-japan.json.gz",
         [{"setId": 1, "name": "M1: Mega Brave", "abbreviation": "M1"},
          {"setId": 2, "name": "Other", "abbreviation": "X"}],
-        [{"name": f"Mon{n} - {n:03d}/010", "setId": 1, "collectorNumber": f"{n:03d}/010"}
-         for n in range(1, 6)]
+        [{"name": "Pikachu - 001/010", "setId": 1, "collectorNumber": "001/010"}]
+        + [{"name": f"Mon{n} - {n:03d}/010", "setId": 1, "collectorNumber": f"{n:03d}/010"}
+           for n in range(2, 6)]
         + [{"name": "Professor's Research - 006/010", "setId": 1, "collectorNumber": "006/010"},
            {"name": "Xmon - 001/010", "setId": 2, "collectorNumber": "001/010"},
            {"name": "Boss - 006/010", "setId": 2, "collectorNumber": "006/010"}],
@@ -147,6 +148,29 @@ def test_trust_thresholds_are_exactly_five_cards_and_95_percent():
     links = JapanLinks.load(jp, None)
     assert trusted_sets(ko, links) == {"A": "unknown", "B": "trusted", "C": "trusted",
                                        "D": "untrusted"}
+
+
+def test_tcgplayer_side_mismatch_makes_a_set_untrusted(tmp_path):
+    root, japan = _tree(tmp_path)
+    write_species(root, {"pikachu": 25, "ivysaur": 2, "venusaur": 3, "charmander": 4,
+                         "charmeleon": 5})
+    # TCGplayer's M1 is another product: its Pokemon names do not match the species
+    write_japan_catalog(japan, [{"setId": 1, "name": "M1: Mega Brave", "abbreviation": "M1"}],
+                        [{"name": f"Other{n} - {n:03d}/010", "setId": 1,
+                          "collectorNumber": f"{n:03d}/010"} for n in range(1, 7)])
+    ctx = _context(root, japan)
+    assert trusted_sets(load_language(root, "ko"), ctx.japan, ctx.species)["M1"] == "untrusted"
+    resolved = {r.card.source_id: r for r in resolve_names(load_language(root, "ko"), ctx)}
+    assert resolved["ko:M1/006"].source != "linked_ja"
+
+
+def test_tcgplayer_printed_total_mismatch_makes_a_set_untrusted(tmp_path):
+    root, japan = _tree(tmp_path)
+    write_japan_catalog(japan, [{"setId": 1, "name": "M1: Mega Brave", "abbreviation": "M1"}],
+                        [{"name": f"Mon{n} - {n:03d}/012", "setId": 1,
+                          "collectorNumber": f"{n:03d}/012"} for n in range(1, 7)])
+    ctx = _context(root, japan)
+    assert trusted_sets(load_language(root, "ko"), ctx.japan, ctx.species)["M1"] == "untrusted"
 
 
 def test_resolve_names_routes(tmp_path):

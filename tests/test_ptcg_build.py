@@ -159,6 +159,45 @@ def test_build_skips_a_failing_language_but_writes_the_others(tmp_path):
     assert LANGUAGE_BY_CODE["de"].asset == "pokemon-german.json.gz"
 
 
+def test_carry_forward_copies_the_previous_file_of_a_failing_language(tmp_path):
+    root, japan = _korean_tree(tmp_path)
+    prev = tmp_path / "previous"
+    prev.mkdir()
+    old = {"products": [{"sourceId": f"ko:{i}", "name": "x", "nameSource": "native"}
+                        for i in range(100)]}
+    with gzip.open(prev / "pokemon-korean.json.gz", "wt", encoding="utf-8") as fh:
+        json.dump(old, fh)
+    out = tmp_path / "release"
+    report = build_languages(root, out, ["ko"], japan_catalog=japan, translations_dir=None,
+                             tcgdex_snapshot=None, previous_dir=prev, carry_forward=True)
+    assert report["ko"]["carriedForward"] is True
+    assert _read(out / "pokemon-korean.json.gz") == old
+
+
+def test_corrupt_previous_file_fails_only_that_language(tmp_path):
+    root, japan = _korean_tree(tmp_path)
+    prev = tmp_path / "previous"
+    prev.mkdir()
+    (prev / "pokemon-korean.json.gz").write_bytes(b"not gzip")
+    report = build_languages(root, tmp_path / "r", ["ko"], japan_catalog=japan,
+                             translations_dir=None, tcgdex_snapshot=None, previous_dir=prev)
+    assert "unreadable" in report["ko"]["error"]
+
+
+def test_renamed_rows_are_reported(tmp_path):
+    root, japan = _korean_tree(tmp_path)
+    out = tmp_path / "release"
+    build_languages(root, out, ["ko"], japan_catalog=japan, translations_dir=None,
+                    tcgdex_snapshot=None)
+    write_japan_catalog(japan, [{"setId": 7, "name": "M1: Mega Brave", "abbreviation": "M1"}],
+                        [{"name": f"Mon{n}v2 - {n:03d}/010", "setId": 7,
+                          "collectorNumber": f"{n:03d}/010"} for n in range(1, 5)]
+                        + [{"name": "Pikachu - 005/010", "setId": 7, "collectorNumber": "005/010"}])
+    report = build_languages(root, tmp_path / "r2", ["ko"], japan_catalog=japan,
+                             translations_dir=None, tcgdex_snapshot=None, previous_dir=out)
+    assert report["ko"]["renamed"] == {"linked_ja": 4}
+
+
 def _snapshot(tmp_path, sets=None):
     path = tmp_path / "tcgdex-en.json"
     path.write_text(json.dumps({"sets": sets or {}}), encoding="utf-8")
@@ -227,3 +266,6 @@ def test_abbreviations_are_unique_and_pinned_to_the_previous_release():
     assert unique_abbreviations({"PR": "PR", "q": "PR"}) == {"PR": "PR", "q": "q"}
     # a set keeps last release's abbreviation while it stays free
     assert unique_abbreviations({"a": "X", "b": "X"}, {"a": "X"}) == {"a": "X", "b": "b"}
+    # a new set proposing an old set's pinned code never takes it, even if the old set's own
+    # proposal changed
+    assert unique_abbreviations({"a": "Y", "new": "X"}, {"a": "X"}) == {"a": "X", "new": "new"}
