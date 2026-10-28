@@ -17,14 +17,14 @@ blob="$(sed -n 's/^blob=//p' "$lock")"
 
 url="https://raw.githubusercontent.com/$repo/$commit/$file"
 if curl -fsSL --retry 3 --retry-delay 10 -o "$dest" "$url" \
-    && [ "$(git hash-object "$dest")" = "$blob" ]; then
+    && [ "$(git hash-object --no-filters "$dest")" = "$blob" ]; then
   echo "fetched $file at $commit"
   exit 0
 fi
 echo "::warning::could not fetch $url (or its content changed); using the previous pinned copy"
 if [ -n "$previous" ] && [ -f "$previous" ]; then
   gunzip -c "$previous" > "$dest"
-  if [ "$(git hash-object "$dest")" = "$blob" ]; then
+  if [ "$(git hash-object --no-filters "$dest")" = "$blob" ]; then
     echo "using the pinned copy from the previous release"
     exit 0
   fi

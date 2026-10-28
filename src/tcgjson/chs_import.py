@@ -39,6 +39,14 @@ DEFAULT_IMAGE_REPO = "KewaiiGamer/PTCG-CHS-Datasets"
 KINDS = {"1": "pokemon", "2": "trainer", "3": "energy"}
 
 
+_ZERO_WIDTH = dict.fromkeys(map(ord, "​‌‍⁠﻿"))
+
+
+def clean_name(value) -> str:
+    """The card name without zero-width characters (one yorenCode, one name)."""
+    return str(value or "").translate(_ZERO_WIDTH).strip()
+
+
 def _int(value) -> int | None:
     try:
         number = int(str(value).strip())
@@ -96,7 +104,7 @@ def load_chs(path: Path, image_base: str) -> tuple[list[Card], dict[str, dict]]:
             image = str(entry.get("image") or "").strip()
             cards.append(Card(
                 source_id=f"zh-cn:{card_id}",
-                name=str(details.get("cardName") or entry.get("name") or "").strip(),
+                name=clean_name(details.get("cardName") or entry.get("name")),
                 set_code=code,
                 set_full_name=collections_by_code[code]["name"],
                 number=norm_number(number.strip()),
@@ -160,20 +168,25 @@ def check_identity(products: list[dict], previous: dict | None) -> None:
     if not previous:
         return
     old_by_id = {p.get("sourceId"): p for p in previous.get("products") or []}
-    old_by_slot = {(p.get("setId"), p.get("collectorNumber"), p.get("rarity"), p.get("nameNative")):
-                   p.get("sourceId") for p in previous.get("products") or []}
+    old_by_slot: dict[tuple, set[str]] = collections.defaultdict(set)
+    for p in previous.get("products") or []:
+        old_by_slot[(p.get("setId"), p.get("collectorNumber"), p.get("rarity"),
+                     p.get("nameNative"))].add(p.get("sourceId"))
+    new_ids = {p["sourceId"] for p in products}
     for product in products:
         old = old_by_id.get(product["sourceId"])
         if old is not None and old.get("yorenCode") != product.get("yorenCode"):
             raise GateError(f"zh-cn: yorenCode of {product['sourceId']} changed from "
                             f"{old.get('yorenCode')} to {product.get('yorenCode')}")
+        if old is not None:
+            continue
+        # A new id in a slot whose previous ids have all disappeared: the card's id changed.
         slot = (product["setId"], product["collectorNumber"], product.get("rarity"),
                 product["nameNative"])
-        old_id = old_by_slot.get(slot)
-        if old_id is not None and old_id != product["sourceId"] and old_id not in {
-                p["sourceId"] for p in products}:
-            raise GateError(f"zh-cn: card {slot} changed its details.id from {old_id} to "
-                            f"{product['sourceId']}")
+        old_ids = old_by_slot.get(slot, set())
+        if old_ids and not (old_ids & new_ids):
+            raise GateError(f"zh-cn: card {slot} changed its details.id from "
+                            f"{sorted(old_ids)} to {product['sourceId']}")
 
 
 def chs_glossary(resolved: list[Resolved]) -> dict[str, str]:
@@ -195,13 +208,10 @@ def chs_pending_items(cards: list[Card], collections_by_code: dict[str, dict],
             continue
         key = cache_key(card.kind, card.name)
         entry = grouped.setdefault(key, {"key": key, "kind": card.kind, "name": card.name,
-                                         "count": 0, "dex": collections.Counter(), "rules": None,
-                                         "yorenCodes": set()})
+                                         "count": 0, "dex": collections.Counter(), "rules": None})
         entry["count"] += 1
         if card.dex:
             entry["dex"][card.dex] += 1
-        if card.raw.get("yorenCode"):
-            entry["yorenCodes"].add(card.raw["yorenCode"])
         if not entry["rules"] and card.rules_text:
             entry["rules"] = card.rules_text[:300]
     for code in sorted({c.set_code for c in cards}):
@@ -209,7 +219,7 @@ def chs_pending_items(cards: list[Card], collections_by_code: dict[str, dict],
         key = cache_key("set", native)
         if native and translations.lookup("set", native) is None and key not in grouped:
             grouped[key] = {"key": key, "kind": "set", "name": native, "count": 1,
-                            "dex": collections.Counter(), "rules": None, "yorenCodes": set()}
+                            "dex": collections.Counter(), "rules": None}
     items = []
     for key in sorted(grouped):
         entry = grouped[key]
@@ -238,11 +248,11 @@ def translate_chs(chs_json: Path, ptcg_root: Path, translations_dir: Path, *, tr
     resolved = resolve_chs(cards, english_fingerprints(load_language(ptcg_root, "en")),
                            translations, species)
     glossary = chs_glossary(resolved)
-    if japan_catalog is not None and Path(japan_catalog).exists():
-        _items, tc_glossary = pending_items(ptcg_root, "zh-tw", Translations("zh-tw", {}, {}),
-                                            japan_catalog=japan_catalog, tcgdex_snapshot=None)
-        for key, english in tc_glossary.items():
-            glossary.setdefault(key, english)
+    japan = japan_catalog if japan_catalog is not None and Path(japan_catalog).exists() else None
+    _items, tc_glossary = pending_items(ptcg_root, "zh-tw", Translations("zh-tw", {}, {}),
+                                        japan_catalog=japan, tcgdex_snapshot=None)
+    for key, english in tc_glossary.items():
+        glossary.setdefault(key, english)
     items = chs_pending_items(cards, collections_by_code, resolved, translations, species)
     return fill_cache(CHS.code, CHS.label, items, glossary, translations, translations_dir,
                       translator=translator, limit=limit, batch_size=batch_size, today=today,
@@ -262,6 +272,9 @@ def build_chs(chs_json: Path, ptcg_root: Path, output: Path, *, translations_dir
         chs_json, f"https://raw.githubusercontent.com/{image_repo}/{ref}/")
     species = load_species(ptcg_root)
     en_index = english_fingerprints(load_language(ptcg_root, "en"))
+    if not species or not en_index:
+        # A missing PTCG-database checkout would silently drop every English link.
+        raise FileNotFoundError(f"no English cards or species table under {ptcg_root}")
     translations = Translations.load(translations_dir, CHS.code)
     resolved = resolve_chs(cards, en_index, translations, species)
     try:

@@ -14,6 +14,7 @@ def _korean_tree(tmp_path):
     root = tmp_path / "ptcg"
     # species names match the TCGplayer names, so the TCGplayer-side trust check passes
     write_species(root, {"pikachu": 25, "mon1": 21, "mon2": 22, "mon3": 23, "mon4": 24})
+    write_card(root, "en", "x/1", name="Unrelated", card_type="Pokémon", card_key="999|10|1|z|1|1")
     for n in range(1, 6):
         write_card(root, "jp", f"M1/{n}", name="j", number=f"{n:03d}", set_name="M1",
                    card_type="Pokémon", print_key=f"asia:M1-{n}", pokedex_number=n + 20, hp=60)
@@ -214,6 +215,9 @@ def _snapshot(tmp_path, sets=None):
 
 def test_missing_link_inputs_refuse_to_build(tmp_path):
     root, japan = _korean_tree(tmp_path)
+    with pytest.raises(FileNotFoundError, match="English cards"):
+        build_languages(tmp_path / "empty", tmp_path / "r", ["ko"], japan_catalog=japan,
+                        translations_dir=None, tcgdex_snapshot=None)
     with pytest.raises(FileNotFoundError, match="Japan catalog"):
         build_languages(root, tmp_path / "r", ["ko"], japan_catalog=None, translations_dir=None,
                         tcgdex_snapshot=None)

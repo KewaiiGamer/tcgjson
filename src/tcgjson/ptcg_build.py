@@ -372,6 +372,9 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
                                     f"not found: {tcgdex_snapshot}")
     english = EnglishIndex(load_language(root, "en"))
     species = load_species(root)
+    if not english.by_card or not species:
+        # A missing or broken PTCG-database checkout would silently drop every English link.
+        raise FileNotFoundError(f"no English cards or species table under {root}")
     tcgdex = TcgdexEnglish.load(tcgdex_snapshot)
     japan = None
     if any(lang.group == "asia" for lang in languages):

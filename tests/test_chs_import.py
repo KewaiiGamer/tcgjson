@@ -159,3 +159,46 @@ def test_changed_yoren_code_or_card_id_stops_the_build(tmp_path):
     path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     report = build_chs(path, root, tmp_path / "out3", translations_dir=None, previous_dir=out)
     assert "details.id" in report["error"]
+
+
+def test_identity_gate_ignores_a_removed_duplicate_and_strips_zero_width(tmp_path):
+    # three basic energies share one slot; dropping one of them is not an id change
+    energies = [_card(10 + i, "基本草能量", "GRA", card_type="3", yoren="Y1", rarity="无标记")
+                for i in range(3)]
+    # filler so that losing one row stays under the 5% row-loss gate
+    filler = [_card(100 + i, f"道具{i}", f"{20 + i:03d}/010", card_type="2", yoren=f"Y{100 + i}")
+              for i in range(20)]
+    path, root = _dataset(tmp_path, extra_cards=energies + filler)
+    out = tmp_path / "out"
+    assert "error" not in build_chs(path, root, out, translations_dir=None)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["collections"][0]["cards"] = [c for c in data["collections"][0]["cards"]
+                                       if c["details"]["id"] != 12]
+    data["collections"][0]["cards"][0]["details"]["cardName"] = "皮卡​丘"
+    path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    report = build_chs(path, root, tmp_path / "out2", translations_dir=None, previous_dir=out)
+    assert "error" not in report, report
+    names = {p["sourceId"]: p["nameNative"] for p in _read(tmp_path / "out2" / "pokemon-chinese-simplified.json.gz")["products"]}
+    assert names["zh-cn:1"] == "皮卡丘"
+
+
+def test_build_chs_refuses_without_english_cards(tmp_path):
+    import pytest
+
+    path, _root = _dataset(tmp_path)
+    with pytest.raises(FileNotFoundError):
+        build_chs(path, tmp_path / "missing", tmp_path / "out", translations_dir=None)
+
+
+def test_carry_forward_on_a_zh_cn_gate_failure(tmp_path):
+    path, root = _dataset(tmp_path)
+    out = tmp_path / "out"
+    build_chs(path, root, out, translations_dir=None)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["collections"][0]["cards"][3]["yorenCode"] = "Y999"
+    path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    report = build_chs(path, root, tmp_path / "out2", translations_dir=None, previous_dir=out,
+                       carry_forward=True)
+    assert report["carriedForward"] is True
+    assert _read(tmp_path / "out2" / "pokemon-chinese-simplified.json.gz") == _read(
+        out / "pokemon-chinese-simplified.json.gz")

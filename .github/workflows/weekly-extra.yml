@@ -55,6 +55,7 @@ jobs:
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Extra catalogs $TAG" --notes "$notes"
           gh release upload "$TAG" release/pokemon-japan.json.gz --clobber
       - name: Download the previous release's language files (gates and name pins)
+        id: previous
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -80,6 +81,7 @@ jobs:
             echo "$asset baseline: $prev_tag"
           done
       - name: Fetch PTCG-database (sparse, pinned in ptcg-database.lock)
+        id: ptcgfetch
         run: bash scripts/fetch_ptcg_database.sh ptcg-database
       - name: Convert PTCG-database languages
         id: ptcg
@@ -95,14 +97,17 @@ jobs:
           fi
       - name: Convert Simplified Chinese (PTCG-CHS-Datasets, pinned in chs-dataset.lock)
         id: chs
-        if: ${{ !cancelled() && steps.japan.outcome == 'success' }}
+        # Needs the baseline and the English cards; otherwise the previous file is carried forward.
+        if: ${{ !cancelled() && steps.japan.outcome == 'success' && steps.previous.outcome == 'success' && steps.ptcgfetch.outcome == 'success' }}
         run: |
           set -uo pipefail
           ok=1
           if bash scripts/fetch_chs_dataset.sh chs.json previous/ptcg-chs-infos.json.gz; then
-            gzip -9c chs.json > release/ptcg-chs-infos.json.gz
             commit="$(sed -n 's/^commit=//p' chs-dataset.lock)"
-            tcgjson import-chs --chs-json chs.json --ptcg-root ptcg-database --output release               --translations translations --previous-dir previous --carry-forward               --source-commit "$commit" | tee -a "$GITHUB_STEP_SUMMARY" || ok=0
+            repo="$(sed -n 's/^repo=//p' chs-dataset.lock)"
+            tcgjson import-chs --chs-json chs.json --ptcg-root ptcg-database --output release               --translations translations --previous-dir previous --carry-forward               --source-commit "$commit" --image-repo "$repo"               | tee -a "$GITHUB_STEP_SUMMARY" || ok=0
+            # The pinned copy is the JSON of the last successful import.
+            if [ "$ok" = 1 ]; then gzip -9c chs.json > release/ptcg-chs-infos.json.gz; fi
           else
             ok=0
           fi
