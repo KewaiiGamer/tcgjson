@@ -58,16 +58,20 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p previous
-          # The newest extra-* release before today's (a same-day re-run never uses itself).
-          prev_tag="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 50 --json tagName             --jq "[.[] | select(.tagName | startswith(\"extra-\")) | select(.tagName != \"$TAG\")][0].tagName // \"\"")"
-          if [ -z "$prev_tag" ]; then echo "no previous extra release"; exit 0; fi
-          have="$(gh release view "$prev_tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
+          # Per asset: the newest extra-* release other than today's that holds it, so one release
+          # without a language file never loses that language's baseline.
+          for attempt in 1 2 3; do
+            gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > releases.json && break
+            sleep 20
+          done
           for asset in $LANGUAGE_ASSETS; do
-            if grep -qxF -- "$asset" <<<"$have"; then
-              gh release download "$prev_tag" --repo "$GITHUB_REPOSITORY" --pattern "$asset" --dir previous
-            else
-              echo "previous release $prev_tag has no $asset"
-            fi
+            prev_tag="$(jq -r --arg tag "$TAG" --arg asset "$asset" '[.[] | select(.tag_name | startswith("extra-")) | select(.tag_name != $tag) | select([.assets[].name] | index($asset))][0].tag_name // ""' releases.json)"
+            if [ -z "$prev_tag" ]; then echo "no earlier release holds $asset"; continue; fi
+            for attempt in 1 2 3; do
+              gh release download "$prev_tag" --repo "$GITHUB_REPOSITORY" --pattern "$asset" --dir previous --clobber && break
+              sleep 20
+            done
+            echo "$asset baseline: $prev_tag"
           done
       - name: Fetch PTCG-database (sparse, pinned in ptcg-database.lock)
         run: bash scripts/fetch_ptcg_database.sh ptcg-database
@@ -91,7 +95,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          readable() { python -c "import gzip,json,sys; json.load(gzip.open(sys.argv[1]))" "$1" 2>/dev/null; }
+          readable() { python -c "import gzip,json,sys; assert isinstance(json.load(gzip.open(sys.argv[1])), dict)" "$1" 2>/dev/null; }
           files=()
           for asset in $LANGUAGE_ASSETS; do
             if [ -f "release/$asset" ] && readable "release/$asset"; then files+=("release/$asset")
