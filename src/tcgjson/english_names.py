@@ -182,7 +182,7 @@ class JapanLinks:
 
     def resolve_code(self, code: str) -> str | None:
         """The TCGplayer code for a PTCG code: exact, else a unique case-insensitive match."""
-        if code in self.set_names or any(c == code for c, _n in self.names):
+        if code in self.set_names:  # every code with products also has a set entry
             return code
         options = self._folded_codes.get(code.casefold(), set())
         return next(iter(options)) if len(options) == 1 else None
@@ -247,6 +247,12 @@ class Resolved:
 
 
 def link_en(card: Card, ctx: NameContext) -> str | None:
+    """English PTCG cards (print_key, card_key) whose names all agree; European languages then
+    fall back to TCGdex's English edition at the same set and number.
+
+    PTCG's English names win over TCGdex when both exist: measured on 18e0de2, the 261 German
+    disagreements are all naming style (TCGdex drops "LV.X", writes "Nidoran♂"), not other cards.
+    """
     name = unanimous(ctx.english.candidates(card))
     if name:
         return name
@@ -264,10 +270,8 @@ def link_ja(card: Card, ctx: NameContext, trust: dict[str, str]) -> str | None:
     jp_cards = ctx.japan.jp_by_print.get(key, []) if key else []
     if not jp_cards:
         return None
-    if card.dex:
-        with_dex = [j for j in jp_cards if j.dex]
-        if with_dex and not _agrees(card, with_dex):
-            return None
+    if card.dex and not _agrees(card, jp_cards):
+        return None  # includes Japanese cards with no Pokedex number to compare against
     code, _, number = key[len("asia:"):].rpartition("-")
     name = ctx.japan.english_name(code, norm_number(number))
     # Safety: a Pokemon card's English name must contain its species (catches numbering drift

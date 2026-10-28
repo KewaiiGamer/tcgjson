@@ -15,6 +15,7 @@ from typing import Callable
 import requests
 
 from .ptcg_import import LANGUAGE_BY_CODE, norm_number
+from .translate import write_atomic
 
 TCGDEX_API = "https://api.tcgdex.net/v2/en/sets/{set_id}"
 EUROPEAN = ("de", "fr", "es", "it", "pt")
@@ -74,6 +75,5 @@ def update_snapshot(path: Path, set_ids: list[str], *, refresh: bool = False,
             failed.append(set_id)
     data["sets"] = dict(sorted(sets.items()))
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=1, sort_keys=True) + "\n",
-                    encoding="utf-8")
+    write_atomic(path, json.dumps(data, ensure_ascii=False, indent=1, sort_keys=True) + "\n")
     return {"fetched": fetched, "failed": failed, "kept": kept}

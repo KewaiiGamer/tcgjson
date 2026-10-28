@@ -105,6 +105,19 @@ def test_translate_language_without_translator_only_fills_the_glossary(tmp_path)
     assert result == {"glossary": 1, "machine": 0, "pending": 4, "error": None}
 
 
+def test_a_broken_cache_file_is_never_overwritten(tmp_path):
+    import pytest
+
+    root = _tree(tmp_path)
+    tdir = tmp_path / "translations"
+    tdir.mkdir()
+    (tdir / "ko.json").write_text("{broken", encoding="utf-8")
+    with pytest.raises(ValueError):
+        translate_language(root, "ko", tdir, translator=None, japan_catalog=None,
+                           tcgdex_snapshot=None)
+    assert (tdir / "ko.json").read_text(encoding="utf-8") == "{broken"
+
+
 def test_translator_error_stops_cleanly_and_keeps_earlier_batches(tmp_path):
     root = _tree(tmp_path)
     tdir = tmp_path / "translations"

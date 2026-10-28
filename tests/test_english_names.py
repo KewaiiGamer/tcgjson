@@ -122,6 +122,33 @@ def test_trusted_sets_need_five_agreeing_pokemon(tmp_path):
     assert trust == {"M1": "trusted", "X": "untrusted"}
 
 
+def test_trust_thresholds_are_exactly_five_cards_and_95_percent():
+    from tcgjson.ptcg_import import Card
+
+    def card(code, n, dex):
+        return Card(source_id=f"ko:{code}/{n}", name="x", set_code=code, set_full_name="",
+                    number=str(n), collector_number=str(n), rarity=None, kind="pokemon", dex=dex,
+                    hp="60", print_key=f"asia:{code}-{n}", card_key=None, img=None,
+                    rules_text=None)
+
+    jp, ko = [], []
+    for n in range(4):  # A: 4 agreeing cards -> unknown
+        jp.append(card("A", n, n + 1))
+        ko.append(card("A", n, n + 1))
+    for n in range(5):  # B: exactly 5 agreeing -> trusted
+        jp.append(card("B", n, n + 1))
+        ko.append(card("B", n, n + 1))
+    for n in range(20):  # C: 19 of 20 agree = 95% -> trusted; D: 18 of 19 = 94.7% -> untrusted
+        jp.append(card("C", n, n + 1))
+        ko.append(card("C", n, n + 1 if n else 999))
+    for n in range(19):
+        jp.append(card("D", n, n + 1))
+        ko.append(card("D", n, n + 1 if n else 999))
+    links = JapanLinks.load(jp, None)
+    assert trusted_sets(ko, links) == {"A": "unknown", "B": "trusted", "C": "trusted",
+                                       "D": "untrusted"}
+
+
 def test_resolve_names_routes(tmp_path):
     root, japan = _tree(tmp_path)
     translations = Translations("ko", {"trainer|박사의 연구": {"en": "Professor's Research",

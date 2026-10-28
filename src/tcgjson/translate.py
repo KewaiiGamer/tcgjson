@@ -62,8 +62,16 @@ class Translations:
         path = Path(directory) / f"{self.language}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         text = json.dumps(self.cache, ensure_ascii=False, indent=1, sort_keys=True)
-        path.write_text(text + "\n", encoding="utf-8")
+        write_atomic(path, text + "\n")
         return path
+
+
+def write_atomic(path: Path, text: str) -> None:
+    """Write UTF-8 text through a temporary file so a crash never leaves a half-written file."""
+    path = Path(path)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8", newline="\n")
+    tmp.replace(path)
 
 
 def _read_json(path: Path) -> dict:

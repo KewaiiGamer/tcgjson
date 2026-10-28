@@ -152,8 +152,78 @@ def test_build_skips_a_failing_language_but_writes_the_others(tmp_path):
                                 for i in range(100)]}, fh)
     out = tmp_path / "release"
     report = build_languages(root, out, ["ko", "de"], japan_catalog=japan, translations_dir=None,
-                             tcgdex_snapshot=None, previous_dir=prev)
+                             tcgdex_snapshot=_snapshot(tmp_path), previous_dir=prev)
     assert "rows" in report["ko"]["error"]
     assert not (out / "pokemon-korean.json.gz").exists()
     assert (out / "pokemon-german.json.gz").exists()
     assert LANGUAGE_BY_CODE["de"].asset == "pokemon-german.json.gz"
+
+
+def _snapshot(tmp_path, sets=None):
+    path = tmp_path / "tcgdex-en.json"
+    path.write_text(json.dumps({"sets": sets or {}}), encoding="utf-8")
+    return path
+
+
+def test_missing_link_inputs_refuse_to_build(tmp_path):
+    root, japan = _korean_tree(tmp_path)
+    with pytest.raises(FileNotFoundError, match="Japan catalog"):
+        build_languages(root, tmp_path / "r", ["ko"], japan_catalog=None, translations_dir=None,
+                        tcgdex_snapshot=None)
+    with pytest.raises(FileNotFoundError, match="TCGdex"):
+        build_languages(root, tmp_path / "r", ["de"], japan_catalog=None, translations_dir=None,
+                        tcgdex_snapshot=tmp_path / "missing.json")
+
+
+def test_gate_translated_row_falling_back_to_native_fails_but_a_link_may_replace_it():
+    previous = {"products": [{"sourceId": "ko:1", "name": "Old", "nameSource": "translated"}]}
+    native = [{"sourceId": "ko:1", "name": "원래", "nameSource": "native", "setCode": "S"}]
+    with pytest.raises(GateError, match="native"):
+        check_gates("ko", native, {}, previous=previous, overridden=set())
+    linked = [{"sourceId": "ko:1", "name": "Official", "nameSource": "linked_en", "setCode": "S"}]
+    check_gates("ko", linked, {}, previous=previous, overridden=set())
+
+
+def test_gate_linked_share_drop_fails():
+    previous = {"meta": {"coverage": {"ko": {"linked_en": 90, "native": 10, "total": 100}}},
+                "products": [{"sourceId": f"ko:{i}", "name": "a", "nameSource": "native"}
+                             for i in range(100)]}
+    products = [{"sourceId": f"ko:{i}", "name": "a", "setCode": "S",
+                 "nameSource": "linked_en" if i < 80 else "native"} for i in range(100)]
+    with pytest.raises(GateError, match="linked share"):
+        check_gates("ko", products, {}, previous=previous, overridden=set())
+
+
+def test_unreadable_source_files_over_one_percent_fail_the_language(tmp_path):
+    root, japan = _korean_tree(tmp_path)
+    (root / "data_ko" / "M1" / "broken.json").write_text("{nope", encoding="utf-8")
+    report = build_languages(root, tmp_path / "r", ["ko"], japan_catalog=japan,
+                             translations_dir=None, tcgdex_snapshot=None)
+    assert "unreadable" in report["ko"]["error"]
+
+
+def test_a_new_print_never_takes_an_existing_card_name(tmp_path):
+    root, japan = _korean_tree(tmp_path)
+    out = tmp_path / "release"
+    build_languages(root, out, ["ko"], japan_catalog=japan, translations_dir=None,
+                    tcgdex_snapshot=None)
+    # a new print that sorts before ko:M1/005 at the same number and English name
+    write_card(root, "ko", "M1/004z", name="몬5", number="005", set_name="M1", set_total="010",
+               card_type="Pokémon", print_key="asia:M1-5", pokedex_number=25, hp=60, rarity="C")
+    out2 = tmp_path / "release2"
+    build_languages(root, out2, ["ko"], japan_catalog=japan, translations_dir=None,
+                    tcgdex_snapshot=None, previous_dir=out)
+    names = {p["sourceId"]: p["name"] for p in _read(out2 / "pokemon-korean.json.gz")["products"]}
+    assert names["ko:M1/005"] == "Pikachu"
+    assert names["ko:M1/005b"] == "Pikachu (RR)"
+    assert names["ko:M1/004z"] == "Pikachu (C)"
+
+
+def test_abbreviations_are_unique_and_pinned_to_the_previous_release():
+    from tcgjson.ptcg_build import unique_abbreviations
+
+    # shared official code falls back to set ids; a fallback never steals another's code
+    assert unique_abbreviations({"a": "X", "b": "X", "c": "C"}) == {"a": "a", "b": "b", "c": "C"}
+    assert unique_abbreviations({"PR": "PR", "q": "PR"}) == {"PR": "PR", "q": "q"}
+    # a set keeps last release's abbreviation while it stays free
+    assert unique_abbreviations({"a": "X", "b": "X"}, {"a": "X"}) == {"a": "X", "b": "b"}

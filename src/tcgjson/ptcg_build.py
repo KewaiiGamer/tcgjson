@@ -31,6 +31,8 @@ from .translate import Translations
 
 NAME_SOURCES = ("official", "linked_en", "linked_ja", "translated", "native")
 MAX_ROW_LOSS = 0.05
+MAX_LINKED_DROP = 5.0  # percentage points of linked share lost against the previous release
+MAX_SKIPPED_SHARE = 0.01  # unreadable source files tolerated per language
 PTCG_REPO = "https://github.com/type-null/PTCG-database"
 
 
@@ -83,7 +85,37 @@ def native_set_name(members: list[Card]) -> str:
     return _most_common(c.set_full_name for c in members)
 
 
-def set_rows(lang: Language, cards: list[Card], ctx: NameContext) -> dict[str, dict]:
+def unique_abbreviations(proposed: dict[str, str], previous: dict[str, str] | None = None
+                         ) -> dict[str, str]:
+    """Final abbreviation per set code, unique within the language.
+
+    The previous release's abbreviation is kept when it is still free (so a set's key does not
+    flip); otherwise the proposed official code when no other set proposes it and it is not
+    another set's code; otherwise the set code itself (codes are unique).
+    """
+    previous = previous or {}
+    codes = set(proposed)
+    counts = collections.Counter(proposed.values())
+    final: dict[str, str] = {}
+    for code in sorted(proposed):
+        abbreviation = proposed[code]
+        if counts[abbreviation] == 1 and (abbreviation == code or abbreviation not in codes):
+            final[code] = abbreviation
+        else:
+            final[code] = code
+    for code, old in sorted(previous.items()):
+        if code not in final or final[code] == old:
+            continue
+        holders = [c for c, a in final.items() if a == old]
+        if not holders and (old == code or old not in codes):
+            final[code] = old
+    if len(set(final.values())) != len(final):
+        raise GateError("set abbreviations are not unique")
+    return final
+
+
+def set_rows(lang: Language, cards: list[Card], ctx: NameContext,
+             previous: dict | None = None) -> dict[str, dict]:
     """``set code -> {setId, name, abbreviation}`` with ``CODE: English name`` names."""
     by_code = sets_by_code(cards)
     abbreviations: dict[str, str] = {}
@@ -95,11 +127,15 @@ def set_rows(lang: Language, cards: list[Card], ctx: NameContext) -> dict[str, d
             name = ctx.translations.lookup("set", native) or native
         abbreviations[code] = abbreviation
         english[code] = name
-    # An official abbreviation shared by two sets of this language falls back to the set id.
-    counts = collections.Counter(abbreviations.values())
+    id_to_code = {set_id_for(lang.code, code): code for code in by_code}
+    if len(id_to_code) != len(by_code):
+        raise GateError(f"{lang.code}: two set codes share a setId")
+    old = {id_to_code[s["setId"]]: s.get("abbreviation") for s in (previous or {}).get("sets") or []
+           if s.get("setId") in id_to_code and s.get("abbreviation")}
+    final = unique_abbreviations(abbreviations, old)
     rows: dict[str, dict] = {}
     for code in sorted(by_code):
-        abbreviation = abbreviations[code] if counts[abbreviations[code]] == 1 else code
+        abbreviation = final[code]
         name = f"{abbreviation}: {english[code]}" if english[code] else abbreviation
         rows[code] = {"setId": set_id_for(lang.code, code), "name": name,
                       "abbreviation": abbreviation}
@@ -110,17 +146,36 @@ def set_rows(lang: Language, cards: list[Card], ctx: NameContext) -> dict[str, d
     return rows
 
 
-def _unique_names(resolved: list[Resolved]) -> list[str]:
+def _unique_names(resolved: list[Resolved], previous_names: dict[str, str] | None = None
+                  ) -> list[str]:
     """Final product names: collisions on (set, number, name) get a suffix.
 
-    The suffix is the rarity, else the source site's card id (stable between builds), else a
-    counter. Rows are never dropped.
+    A card keeps its previous release name when that name still fits its base name and is free,
+    so a newly added print never takes over an existing card's name. Otherwise the suffix is the
+    rarity, else the source site's card id, else a counter. Rows are never dropped.
     """
+    previous_names = previous_names or {}
     taken: set[tuple[str, str, str]] = set()
-    out: list[str] = []
-    for item in resolved:
+    out: list[str | None] = [None] * len(resolved)
+
+    def base_of(item: Resolved) -> str:
         card = item.card
-        base = item.name or f"Unknown card {card.collector_number or card.number}".strip()
+        return item.name or f"Unknown card {card.collector_number or card.number}".strip()
+
+    for index, item in enumerate(resolved):
+        card = item.card
+        old = previous_names.get(card.source_id)
+        base = base_of(item)
+        if old and (old == base or old.startswith(base + " (")):
+            key = (card.set_code, card.collector_number, old)
+            if key not in taken:
+                taken.add(key)
+                out[index] = old
+    for index, item in enumerate(resolved):
+        if out[index] is not None:
+            continue
+        card = item.card
+        base = base_of(item)
         candidates = [base]
         if card.rarity:
             candidates.append(f"{base} ({card.rarity})")
@@ -135,13 +190,16 @@ def _unique_names(resolved: list[Resolved]) -> list[str]:
                 name = option
             counter += 1
         taken.add((card.set_code, card.collector_number, name))
-        out.append(name)
-    return out
+        out[index] = name
+    return [name for name in out if name is not None]
 
 
-def products_for(lang: Language, resolved: list[Resolved], sets: dict[str, dict]) -> list[dict]:
+def products_for(lang: Language, resolved: list[Resolved], sets: dict[str, dict],
+                 previous: dict | None = None) -> list[dict]:
+    previous_names = {p.get("sourceId"): p.get("name")
+                      for p in (previous or {}).get("products") or [] if p.get("sourceId")}
     products = []
-    for item, name in zip(resolved, _unique_names(resolved)):
+    for item, name in zip(resolved, _unique_names(resolved, previous_names)):
         card = item.card
         product = {
             "name": name,
@@ -194,15 +252,31 @@ def check_gates(code: str, products: list[dict], trust: dict[str, str], *, previ
     if before and len(products) < (1 - MAX_ROW_LOSS) * len(before):
         raise GateError(f"{code}: {len(products)} rows, previous release had {len(before)} "
                         f"(more than {MAX_ROW_LOSS:.0%} lost)")
+    # A translated name stays identical, unless an override changed it or an official link
+    # (linked_en / linked_ja) replaced it; falling back to native or another translation fails.
     old_translated = {p.get("sourceId"): p.get("name") for p in before
                       if p.get("nameSource") == "translated"}
     for product in products:
-        if product["nameSource"] != "translated" or product["sourceId"] in overridden:
+        if product["sourceId"] in overridden or product["nameSource"] in LINKED_SOURCES:
             continue
         old = old_translated.get(product["sourceId"])
         if old is not None and old != product["name"]:
             raise GateError(f"{code}: translated name of {product['sourceId']} changed from "
-                            f"{old!r} to {product['name']!r} without an override")
+                            f"{old!r} to {product['name']!r} ({product['nameSource']}) "
+                            "without an override")
+    old_counts = ((previous.get("meta") or {}).get("coverage") or {}).get(code)
+    if old_counts and old_counts.get("total"):
+        old_share = linked_share(old_counts)
+        new_share = linked_share(coverage_counts(products))
+        if old_share - new_share > MAX_LINKED_DROP:
+            raise GateError(f"{code}: linked share fell from {old_share:.1f}% to {new_share:.1f}% "
+                            "(missing Japan catalog or TCGdex snapshot?)")
+
+
+def linked_share(counts: dict[str, int]) -> float:
+    total = counts.get("total") or 0
+    linked = sum(counts.get(source, 0) for source in LINKED_SOURCES)
+    return 100.0 * linked / total if total else 0.0
 
 
 def _read_previous(previous_dir: Path | None, lang: Language) -> dict | None:
@@ -248,6 +322,15 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
     output.mkdir(parents=True, exist_ok=True)
     generated_at = generated_at or dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     languages = [LANGUAGE_BY_CODE[code] for code in codes]
+    # Missing link inputs would silently turn linked names into native ones: refuse to build.
+    if any(lang.group == "asia" for lang in languages):
+        if japan_catalog is None or not Path(japan_catalog).exists():
+            raise FileNotFoundError(f"Korean / Traditional Chinese need the Japan catalog "
+                                    f"(--japan-catalog), not found: {japan_catalog}")
+    if any(lang.group == "tcgdex" for lang in languages):
+        if tcgdex_snapshot is None or not Path(tcgdex_snapshot).exists():
+            raise FileNotFoundError(f"European languages need the TCGdex English snapshot, "
+                                    f"not found: {tcgdex_snapshot}")
     english = EnglishIndex(load_language(root, "en"))
     species = load_species(root)
     tcgdex = TcgdexEnglish.load(tcgdex_snapshot)
@@ -256,20 +339,27 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
         japan = JapanLinks.load(load_language(root, "jp"), japan_catalog)
     report: dict[str, dict] = {}
     for lang in languages:
-        cards = load_language(root, lang.code)
+        stats: dict[str, int] = {}
+        cards = load_language(root, lang.code, stats=stats)
+        previous = _read_previous(previous_dir, lang)
         ctx = build_context(root, lang, english=english, japan=japan, tcgdex=tcgdex,
                             translations_dir=translations_dir, species=species)
         resolved = resolve_names(cards, ctx)
         trust = set_trust(cards, ctx)
-        sets = set_rows(lang, cards, ctx)
-        products = products_for(lang, resolved, sets)
-        counts = coverage_counts(products)
         try:
+            skipped = stats.get("skipped", 0)
+            if skipped > MAX_SKIPPED_SHARE * max(1, skipped + len(cards)):
+                raise GateError(f"{lang.code}: {skipped} unreadable source files")
+            sets = set_rows(lang, cards, ctx, previous)
+            products = products_for(lang, resolved, sets, previous)
+            counts = coverage_counts(products)
             gate_rows = [dict(p, setCode=item.card.set_code) for p, item in zip(products, resolved)]
-            check_gates(lang.code, gate_rows, trust, previous=_read_previous(previous_dir, lang),
+            check_gates(lang.code, gate_rows, trust, previous=previous,
                         overridden=_overridden(resolved, ctx.translations))
         except GateError as exc:
-            report[lang.code] = {"error": str(exc), "coverage": counts}
+            report[lang.code] = {"error": str(exc),
+                                 "coverage": coverage_counts(
+                                     [{"nameSource": r.source} for r in resolved])}
             continue
         trust_counts = collections.Counter(trust.values())
         data = {
@@ -285,6 +375,7 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
                 "source": {"name": "PTCG-database", "repo": PTCG_REPO, "commit": source_commit,
                            "license": "MIT"},
                 "coverage": {lang.code: counts},
+                "skippedSourceFiles": stats.get("skipped", 0),
                 "setTrust": {k: trust_counts.get(k, 0) for k in ("trusted", "untrusted", "unknown")},
             },
             "sets": sorted(sets.values(), key=lambda s: s["name"]),
@@ -295,5 +386,6 @@ def build_languages(root: Path, output: Path, codes: list[str], *, japan_catalog
         with gzip.open(tmp, "wt", encoding="utf-8") as fh:
             json.dump(data, fh, ensure_ascii=False, separators=(",", ":"))
         tmp.replace(path)
-        report[lang.code] = {"coverage": counts, "file": str(path)}
+        report[lang.code] = {"coverage": counts, "file": str(path),
+                             "skipped": stats.get("skipped", 0)}
     return report

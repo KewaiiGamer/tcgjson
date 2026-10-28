@@ -133,8 +133,14 @@ def _stable_ref(record: dict[str, Any], rel: str) -> str:
     return rel.rsplit("/", 1)[-1]
 
 
-def load_language(root: Path, code_or_folder: str) -> list[Card]:
-    """Every physical card of one language folder, sorted by source id."""
+def load_language(root: Path, code_or_folder: str, stats: dict[str, int] | None = None
+                  ) -> list[Card]:
+    """Every physical card of one language folder, sorted by source id.
+
+    Unreadable or non-object files are counted in ``stats["skipped"]`` (the build gates on it).
+    """
+    stats = stats if stats is not None else {}
+    stats.setdefault("skipped", 0)
     lang = LANGUAGE_BY_CODE.get(code_or_folder)
     folder = lang.folder if lang else code_or_folder
     code = lang.code if lang else code_or_folder
@@ -146,10 +152,12 @@ def load_language(root: Path, code_or_folder: str) -> list[Card]:
                 continue
             path = Path(dirpath) / filename
             try:
-                record = json.loads(path.read_text(encoding="utf-8"))
+                record = json.loads(path.read_text(encoding="utf-8-sig"))
             except (OSError, ValueError):
+                stats["skipped"] += 1
                 continue
             if not isinstance(record, dict):
+                stats["skipped"] += 1
                 continue
             print_key = record.get("print_key") or None
             if isinstance(print_key, str) and print_key.startswith("pocket:"):
