@@ -64,8 +64,15 @@ jobs:
             gh release download "$CACHE_RELEASE_TAG" --repo "${{ github.repository }}" --pattern '*.full.json' --dir release-cache || true
             gh release download "$CACHE_RELEASE_TAG" --repo "${{ github.repository }}" --pattern '*.full.json.gz' --dir release-cache || true
           else
-            gh release download --repo "${{ github.repository }}" --pattern '*.full.json' --dir release-cache || true
-            gh release download --repo "${{ github.repository }}" --pattern '*.full.json.gz' --dir release-cache || true
+            # This repository also publishes "extra-*" releases (the other languages), so the latest
+            # release is not necessarily a weekly one: take the newest weekly-* release, a seed included.
+            PREVIOUS_TAG="$(gh release list --repo "${{ github.repository }}" --limit 100 --json tagName,publishedAt \
+              --jq '[.[] | select(.tagName | startswith("weekly-"))] | sort_by(.publishedAt) | last | .tagName // empty' || true)"
+            if [ -n "$PREVIOUS_TAG" ]; then
+              echo "Using $PREVIOUS_TAG as the release cache."
+              gh release download "$PREVIOUS_TAG" --repo "${{ github.repository }}" --pattern '*.full.json' --dir release-cache || true
+              gh release download "$PREVIOUS_TAG" --repo "${{ github.repository }}" --pattern '*.full.json.gz' --dir release-cache || true
+            fi
           fi
       - name: Validate release cache
         env:
