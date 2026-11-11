@@ -5,9 +5,11 @@ import requests
 
 from tcgjson.cli import build_parser
 
+from tcgjson.validate import validate_release
 from tcgjson.bulk import (
     assemble_release,
     build_release,
+    dedupe_cross_set_products,
     fetch_product_line,
     _recent_set_ids,
     write_bulk_manifest,
@@ -320,6 +322,90 @@ def test_fetch_product_line_uses_search_as_product_source() -> None:
     assert "priceGuide" not in catalog["products"][0]
     assert "marketPrice" not in catalog["products"][0]
     assert catalog["products"][0]["metadata"]["customAttributes"]["releaseDate"] == "2024-03-08T00:00:00Z"
+
+
+def test_dedupe_cross_set_products_keeps_the_lowest_set_and_recounts() -> None:
+    sets = [
+        {"setId": 5, "name": "Regional", "productCount": 2},
+        {"setId": 2, "name": "Original", "productCount": 2},
+        {"setId": 9, "name": "Other", "productCount": 1},
+    ]
+    products = [
+        {"productId": 100, "setId": 5, "name": "Dusclops"},
+        {"productId": 101, "setId": 5, "name": "Only here"},
+        {"productId": 100, "setId": 2, "name": "Dusclops"},
+        {"productId": 102, "setId": 2, "name": "Unique"},
+        {"productId": 103, "setId": 9, "name": "Elsewhere"},
+    ]
+
+    kept, dropped = dedupe_cross_set_products(sets, products)
+
+    assert [(p["productId"], p["setId"]) for p in kept] == [(101, 5), (100, 2), (102, 2), (103, 9)]
+    assert [(p["productId"], p["setId"]) for p in dropped] == [(100, 5)]
+    assert {s["setId"]: s["productCount"] for s in sets} == {5: 1, 2: 2, 9: 1}
+
+
+def test_dedupe_cross_set_products_drops_a_repeat_inside_the_same_set() -> None:
+    sets = [{"setId": 1, "name": "Set", "productCount": 2}]
+    products = [{"productId": 7, "setId": 1}, {"productId": 7, "setId": 1}]
+
+    kept, dropped = dedupe_cross_set_products(sets, products)
+
+    assert len(kept) == 1 and len(dropped) == 1
+    assert sets[0]["productCount"] == 1
+
+
+def test_dedupe_cross_set_products_changes_nothing_without_duplicates() -> None:
+    sets = [{"setId": 1, "productCount": 5}, {"setId": 2, "productCount": 9}]
+    products = [{"productId": 1, "setId": 1}, {"productId": 2, "setId": 2}]
+
+    kept, dropped = dedupe_cross_set_products(sets, products)
+
+    assert kept == products and dropped == []
+    # The declared counts are left alone: the validator checks them against the products.
+    assert [s["productCount"] for s in sets] == [5, 9]
+
+
+class SharedProductClient(CachedSetClient):
+    """Two sets, one of which re-lists a product of the other (TCGplayer does this for regional sets)."""
+
+    def get_product_lines(self):
+        return [{"productLineId": 3, "productLineName": "Pokemon", "productLineUrlName": "pokemon"}]
+
+    def get_set_names(self, product_line_id, *, active=True):
+        return [
+            {"setNameId": 24864, "name": "Southeast Asia Exclusives", "urlName": "sea"},
+            {"setNameId": 100, "name": "Original", "urlName": "original"},
+        ]
+
+    def iter_search_products(self, *, product_line_name, set_id, set_name=None, page_size=50):
+        shared = {
+            "productId": 683198,
+            "productName": "Dusclops - 019/064 (GYM)",
+            "productLineId": 3,
+            "productLineName": "Pokemon",
+            "setId": set_id,
+            "rarityName": "Rare",
+            "customAttributes": {"number": "019/064"},
+        }
+        yield shared
+        yield {**shared, "productId": 700000 + set_id, "productName": f"Own card {set_id}"}
+
+
+def test_fetch_product_line_survives_a_product_listed_under_two_sets(tmp_path) -> None:
+    catalog = fetch_product_line(SharedProductClient(), 3)
+
+    ids = [p["productId"] for p in catalog["products"]]
+    assert ids.count(683198) == 1
+    assert next(p for p in catalog["products"] if p["productId"] == 683198)["setId"] == 100
+    counts = {s["setId"]: s["productCount"] for s in catalog["sets"]}
+    assert counts == {100: 2, 24864: 1}
+    assert catalog["meta"]["productCount"] == 3
+
+    # The release that used to fail validation now passes it.
+    files = write_product_line_files(tmp_path, catalog)
+    write_bulk_manifest(tmp_path, files)
+    validate_release(tmp_path)
 
 
 def test_fetch_product_line_ignores_cache_without_set_id_search_marker(tmp_path) -> None:
