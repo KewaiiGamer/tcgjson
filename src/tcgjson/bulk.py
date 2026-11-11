@@ -72,6 +72,43 @@ def _progress(iterable: Iterable[T], *, enabled: bool, **kwargs: Any) -> Iterabl
     return tqdm(iterable, **kwargs)
 
 
+def dedupe_cross_set_products(
+    sets: list[dict[str, Any]], products: list[dict[str, Any]]
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Keep each productId once across the whole catalog.
+
+    TCGplayer sometimes lists one product under two sets, for example a regional re-listing such as
+    "Southeast Asia Exclusives". The release validator requires unique product ids, so one such
+    product used to abort the whole weekly release. The copy in the lowest setId (the original set,
+    since set ids grow over time) is kept, the others are dropped, and the `productCount` of every
+    set is recounted. Returns the kept products and the dropped ones; nothing changes when there are
+    no duplicates.
+    """
+    owner: dict[int, int] = {}
+    for product in products:
+        product_id = int(product.get("productId") or 0)
+        set_id = int(product.get("setId") or 0)
+        if product_id not in owner or set_id < owner[product_id]:
+            owner[product_id] = set_id
+    kept: list[dict[str, Any]] = []
+    dropped: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    for product in products:
+        product_id = int(product.get("productId") or 0)
+        if int(product.get("setId") or 0) != owner[product_id] or product_id in seen:
+            dropped.append(product)
+            continue
+        seen.add(product_id)
+        kept.append(product)
+    if dropped:
+        counts: dict[int, int] = {}
+        for product in kept:
+            counts[int(product.get("setId") or 0)] = counts.get(int(product.get("setId") or 0), 0) + 1
+        for set_row in sets:
+            set_row["productCount"] = counts.get(int(set_row.get("setId") or 0), 0)
+    return kept, dropped
+
+
 def _log_progress(enabled: bool, message: str) -> None:
     if enabled:
         print(f"[{_utc_now_iso()}] {message}", flush=True)
@@ -571,6 +608,15 @@ def fetch_product_line(
                 )
             sets.append(set_summary)
         products.extend(set_products)
+
+    products, dropped_duplicates = dedupe_cross_set_products(sets, products)
+    if dropped_duplicates:
+        dropped_ids = sorted({int(item["productId"]) for item in dropped_duplicates})
+        _log_progress(
+            log_progress,
+            f"{resolved.slug}: dropped {len(dropped_duplicates)} product(s) listed in more than one set, "
+            f"keeping the copy in the lowest setId: {dropped_ids[:20]}",
+        )
 
     elapsed_seconds = time.perf_counter() - started
     sets.sort(key=lambda item: (item["name"], item["setId"]))
